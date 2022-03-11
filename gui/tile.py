@@ -9,7 +9,7 @@ def ensureRaised(w):
 		w.raise_()
 
 def widgetAt(p, pos):
-	for w in p.children():
+	for w in p.parentWidget().children():
 		if (p.x() <= pos.x() and p.x()+p.width() >= pos.x()) and (p.y() <= pos.y() and p.y()+p.height() >= pos.y()) and w != p:
 			return p
 
@@ -51,7 +51,12 @@ class Tile(QLabel):
 		if not self.press:
 			#Update when the move is a 'normal' one, used while changing game board with anims mainly.
 			self.source = self.mapToParent(self.pos())
-		return super(Tile, self).moveEvent(event)
+			return super(Tile, self).moveEvent(event)
+		else:
+			w = widgetAt(self, self.source)
+			if w and isinstance(w, InputTile):
+				w.tile_hovered = True
+				w.repaint()
 
 	def mousePressEvent(self, event):
 		if self.isEnabled() and self.movable:
@@ -68,32 +73,53 @@ class Tile(QLabel):
 			upd = self.mapToParent(event.pos())
 			return super(Tile, self).mouseReleaseEvent(event)
 
-class InputTile(Tile):
+arrows = {}
+p = QPolygonF()
+p << QPointF(35, 10) << QPointF(10, 60) << QPointF(60, 60)
+arrows[0] = p
+p = QPolygonF()
+p << QPointF(60, 35) << QPointF(10, 10) << QPointF(10, 60)
+arrows[1] = p
+p = QPolygonF()
+p << QPoint(35, 60) << QPointF(10, 10) << QPointF(60, 10)
+arrows[2] = p
+p = QPolygonF()
+p << QPointF(10, 35) << QPointF(60, 10) << QPointF(60, 60)
+arrows[3] = p
 
+def get_arrows():
+	global arrows
+	return arrows
+
+class InputTile(Tile):
 	def __init__(self, d, parent = None):
 		super(InputTile, self).__init__(d, parent)
 		self.tile_hovered = False
-		poly = QPolygonF()
-		poly << QPointF(35, 10) << QPointF(10, 60) << QPointF(60, 60)
-		path = QPainterPath()
-		path.addPolygon(poly)
 		self.setText("B")
-		mx = QTransform()
-		print({0: 0, 1: 90, 2: 180, 3: 270}[d.orientation])
-		mx.rotate({0: 0, 1: 90, 2: 180, 3: 270}[d.orientation])
-		self._path = mx.map(path)
+		path = QPainterPath()
+		path.addPolygon(get_arrows()[d.orientation])
+		self._path = path
 
 	def mouseMoveEvent(self, event):
 		#Get the upper tile
 		upd = self.mapToParent(event.pos())
-		self.tile_hovered = (self.x() <= upd.x() and self.x()+self.width() >= upd.x()) and (self.y() <= upd.y() and self.y()+self.height() >= upd.y())
+		if (self.x() <= upd.x() and self.x()+self.width() >= upd.x()) and (self.y() <= upd.y() and self.y()+self.height() >= upd.y()):
+			if not self.tile_hovered:
+				self.tile_hovered = True
+				self.repaint()
+			else:
+				self.tile_hovered = False
+				self.repaint()
+		elif self.tile_hovered:
+			self.tile_hovered = False
+			self.repaint()
+		return super(InputTile, self).mouseMoveEvent(event)
 
 	def paintEvent(self, ev):
 		painter = QPainter()
 		painter.begin(self)
-		painter.fillRect(ev.rect(), QBrush(Qt.green))
 		if self.tile_hovered:
-			painter.fillRect(ev.rect(), QBrush(Qt.green))
+			painter.fillRect(self.rect(), QBrush(Qt.green))
 		painter.fillPath(self._path, QBrush(Qt.yellow))
 		painter.end()
 		return super(InputTile, self).paintEvent(ev)

@@ -31,7 +31,7 @@ class Board(QWidget):
 				l = InputTile(TestData(1), self)
 				r = InputTile(TestData(3), self)
 				l.move(0, i*70 +70)
-				r.move(540, i*70 +70)
+				r.move(560, i*70 +70)
 				self.input_tiles.append(l)
 				self.input_tiles.append(r)
 		for i in range(7):
@@ -39,7 +39,7 @@ class Board(QWidget):
 				u = InputTile(TestData(2), self)
 				d = InputTile(TestData(), self)
 				u.move(i*70 +70, 0)
-				d.move(i*70 +70, 540)
+				d.move(i*70 +70, 560)
 				self.input_tiles.append(u)
 				self.input_tiles.append(d)
 
@@ -56,4 +56,18 @@ class Board(QWidget):
 		for x in range(7):
 			for y in range(7):
 				self.tiles[x][y].move(x*70+70+w, y*70+70+h)
+
+		for i in range(7):
+			if i%2 == 1:
+				l = self.input_tiles[i-1]
+				r = self.input_tiles[i]
+				l.move(w, i*70 +70+h)
+				r.move(560+w, i*70 +70+h)
+		for i in range(7):
+			if i%2 == 1:
+				u = self.input_tiles[i-1+6]
+				d = self.input_tiles[i+6]
+				u.move(i*70 +70+w, h)
+				d.move(i*70 +70+w, 560+h)
+
 		super(Board, self).resizeEvent(event)
