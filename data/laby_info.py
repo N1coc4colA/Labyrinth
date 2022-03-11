@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+from random import randint
 
-class plato :
-    def __init__(self):
+class Plato :
+    def __init__(self, nb_joueur):
         self.hight = 7
         self.width = 7
         self.board = [[Tile(True, i+j*7, 'line') for j in range(self.width)]for i in range(self.hight)]
@@ -30,8 +31,11 @@ class plato :
                 elif self.board[i][j].get_id()%2 == 1 :  # initialisation des cases inpaires
                     self.board[i][j].modif_stat(False)
                     self.board[i][j].modif_raod('triple')
-                    
-                    
+        if nb_joueur == 1 :
+            pass
+                    #☺on verra plus tard pour le nombre de bot
+        elif nb_jouer == 2 :
+            j1 = Perso(1, -è-------------------------------------------------------------------------)
                 
 
 class Tile :
@@ -104,10 +108,50 @@ class Tile :
         self.orientation = orientation
         
 
-class parso :
-    def __init__(self, color, liste, rank) :
-        self.liste = liste
-        self.goal = liste[rank]
+class Perso :
+    def __init__(self, color, pile) :
+        self.goal = pile
         self.color = color
+        if self.color == 1 : #tuple provisoir
+            self.location = (0, 0)
+        elif self.color == 2 :
+            self.location = (7, 0)
+        elif self.color == 3 :
+            self.location = (7, 7)
+        elif self.color == 4 :
+            self.location = (0, 7)
         
-game = plato
+    def get_location(self) :
+        return self.location
+    
+    def modif_location(self, x, y) :
+        self.location = (x, y)
+
+class Card :
+    def __init__(self) :
+         self.liste = ["Pringles", "Dragon", "Passoire", "Langouste", "Bouteille", "Apple", "Ring", "LaserSaber", "PiderPig", "Covid", "Grale", "Meme", "Meme", "Kassos", "The Clap", "Batman", "Sun", "Homer", "Elon Musk", "Peery", "Pigeon", "Idefix", "Eye of Sauron", "oooooooooooo"]
+         
+    def random(self) :
+        for i in range(0,24) :
+            a, b = randint(0,24), randint(0,24)
+            self.liste[a], self.liste[b] = self.liste[b], self.liste[a]
+            
+         
+            
+
+class Pile :
+    def __init__(self) :
+        self.pile = []
+    
+    def append(self, add) :
+        self.pile.append(add)
+    
+    def pop(self):
+        self.pile.pop(len(self.pile))
+        
+    def len_(self) :
+        return len(self.pile)
+    
+
+        
+game = Plato
