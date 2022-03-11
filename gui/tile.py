@@ -71,16 +71,17 @@ class Tile(QLabel):
 class InputTile(Tile):
 
 	def __init__(self, d, parent = None):
-		super(InputTile, self).__init__(parent)
+		super(InputTile, self).__init__(d, parent)
 		self.tile_hovered = False
 		poly = QPolygonF()
 		poly << QPointF(35, 10) << QPointF(10, 60) << QPointF(60, 60)
-		self._path = QPainterPath()
-		self._path.addPolygon(poly)
+		path = QPainterPath()
+		path.addPolygon(poly)
 		self.setText("B")
-		"""mx = QtGui.QMatrix()
+		mx = QTransform()
+		print({0: 0, 1: 90, 2: 180, 3: 270}[d.orientation])
 		mx.rotate({0: 0, 1: 90, 2: 180, 3: 270}[d.orientation])
-		self._path = mx.map(self._path)"""
+		self._path = mx.map(path)
 
 	def mouseMoveEvent(self, event):
 		#Get the upper tile
@@ -88,10 +89,12 @@ class InputTile(Tile):
 		self.tile_hovered = (self.x() <= upd.x() and self.x()+self.width() >= upd.x()) and (self.y() <= upd.y() and self.y()+self.height() >= upd.y())
 
 	def paintEvent(self, ev):
-		painter = QPainter(self)
+		painter = QPainter()
+		painter.begin(self)
 		painter.fillRect(ev.rect(), QBrush(Qt.green))
 		if self.tile_hovered:
 			painter.fillRect(ev.rect(), QBrush(Qt.green))
 		painter.fillPath(self._path, QBrush(Qt.yellow))
+		painter.end()
 		return super(InputTile, self).paintEvent(ev)
 
