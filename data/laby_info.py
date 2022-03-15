@@ -5,37 +5,52 @@ class Plato :
     def __init__(self, nb_joueur):
         self.hight = 7
         self.width = 7
+        self.card = Card()
         self.board = [[Tile(True, i+j*7, 'line') for j in range(self.width)]for i in range(self.hight)]
         for i in range(self.hight) :
-            for j in range(self.widht) :
+            for j in range(self.width) :
                 if i == 0 and j == 0 :                  # initialisation of spwan 1 
                     self.board[i][j].modif_stat(False)
                     self.board[i][j].modif_color(1)
-                    self.board[i][j].modif_raod('angle')
+                    self.board[i][j].modif_road('angle')
                     
                 elif i == 0 and j == 7 :                  # initialisation of spwan 2
                     self.board[i][j].modif_stat(False)
                     self.board[i][j].modif_color(2)
-                    self.board[i][j].modif_raod('angle')
+                    self.board[i][j].modif_road('angle')
                     
                 elif i == 7 and j == 0 :                  # initialisation of spwan 3
                     self.board[i][j].modif_stat(False)
                     self.board[i][j].modif_color(3)
-                    self.board[i][j].modif_raod('angle')
+                    self.board[i][j].modif_road('angle')
                     
                 elif i == 7 and j == 7 :                  # initialisation of spwan 4
                     self.board[i][j].modif_stat(False)
                     self.board[i][j].modif_color(4)
-                    self.board[i][j].modif_raod('angle')
+                    self.board[i][j].modif_road('angle')
                     
                 elif self.board[i][j].get_id()%2 == 1 :  # initialisation des cases inpaires
                     self.board[i][j].modif_stat(False)
-                    self.board[i][j].modif_raod('triple')
+                    self.board[i][j].modif_road('triple')
+                    
+        self.card.random()
         if nb_joueur == 1 :
             pass
-                    #☺on verra plus tard pour le nombre de bot
-        elif nb_jouer == 2 :
-            j1 = Perso(1, -è-------------------------------------------------------------------------)
+                    #☺on verra plus tard pour le nombre de bot---------------------------------------------------------------------------------------------
+        elif nb_joueur == 2 :
+            self.j1 = Perso(1, self.card.liste[:12])
+            self.j2 = Perso(3, self.card.liste[12:])
+            
+        elif nb_joueur == 3 :
+            self.j1 = Perso(1, self.card.liste[:5])
+            self.j2 = Perso(2, self.card.liste[6:12])
+            self.j3 = Perso(3, self.card.liste[12:18])
+            
+        elif nb_joueur == 4 :
+            self.j1 = Perso(1, self.card.liste[:6])
+            self.j2 = Perso(2, self.card.liste[6:12])
+            self.j3 = Perso(3, self.card.liste[12:18])
+            self.j4 = Perso(4, self.card.liste[18:])
                 
 
 class Tile :
@@ -43,7 +58,6 @@ class Tile :
         """
         Cette class initialise des tuile carré qui vont fassoné le labyrinte.
         Cette class associe les toutes les valeurs (information) nécessaire pour les différencié et les utilisé
-
         Parameters
         ----------
         fix : BOOLEAN
@@ -61,15 +75,14 @@ class Tile :
         color : INT, optional
             | 0 = pas de spawn | 1 = spwan 'blanc' | 2 = spawn 'turquoise' | 3 = spwn 'noir' | 4 = spawn 'violet' |
             The default is 0.
-
+            
         Returns
         -------
         None.
-
         """
         self.item = objet
         self.stat = fix
-        self.spwan = color
+        self.spawn = color
         self._id = ID
         self.road = road
         self.orientation = 0       # orientation | 0 = 0° | 1 = 90° | 2 = 180° | 3 = 270° |
@@ -99,9 +112,9 @@ class Tile :
         self.stat = stat
     
     def modif_color(self, color) :
-        self.color = color
+        self.spawn = color
         
-    def mofi_road(self, road) :
+    def modif_road(self, road) :
         self.road = road
         
     def modif_orientation(self, orientation) :
@@ -129,11 +142,11 @@ class Perso :
 
 class Card :
     def __init__(self) :
-         self.liste = ["Pringles", "Dragon", "Passoire", "Langouste", "Bouteille", "Apple", "Ring", "LaserSaber", "PiderPig", "Covid", "Grale", "Meme", "Meme", "Kassos", "The Clap", "Batman", "Sun", "Homer", "Elon Musk", "Peery", "Pigeon", "Idefix", "Eye of Sauron", "oooooooooooo"]
+        self.liste = ["Pringles", "Dragon", "Passoire", "Langouste", "Bouteille", "Apple", "Ring", "LaserSaber", "PiderPig", "Covid", "Grale", "Meme", "Meme", "Kassos", "The Clap", "Batman", "Sun", "Homer", "Elon Musk", "Peery", "Pigeon", "Idefix", "Eye of Sauron", "oooooooooooo"]
          
     def random(self) :
         for i in range(0,24) :
-            a, b = randint(0,24), randint(0,24)
+            a, b = randint(0,23), randint(0,23)
             self.liste[a], self.liste[b] = self.liste[b], self.liste[a]
             
          
@@ -154,4 +167,4 @@ class Pile :
     
 
         
-game = Plato
+game = Plato(4)
