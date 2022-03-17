@@ -2,12 +2,16 @@
 from random import randint
 
 class Plato :
-    def __init__(self, nb_joueur):
-        self.hight = 7
+    def __init__(self, nb_joueur) : #||||||||||||||||||||||||| mieux organiser la répartition des directions des chemin |||||||||||||||||||||||||||||||||||| 
+        self.height = 7
         self.width = 7
+        
         self.card = Card()
-        self.board = [[Tile(True, i+j*7, 'line') for j in range(self.width)]for i in range(self.hight)]
-        for i in range(self.hight) :
+        self.all_tile = []
+        
+        self.out_tile = Tile(True, 49, 'line')  #road et objet vont changer
+        self.board = [[Tile(True, i+j*7, 'line') for i in range(self.width)]for j in range(self.height)]
+        for i in range(self.height) :
             for j in range(self.width) :
                 if i == 0 and j == 0 :                  # initialisation of spwan 1 
                     self.board[i][j].modif_stat(False)
@@ -32,7 +36,22 @@ class Plato :
                 elif self.board[i][j].get_id()%2 == 1 :  # initialisation des cases inpaires
                     self.board[i][j].modif_stat(False)
                     self.board[i][j].modif_road('triple')
-                    
+        
+        for i in range(self.width):
+            for j in range(self.height):
+                if (i == 0 or i == self.width-1) and (j == 0 or j == self.height-1):
+                    self.board[i][j].modif_stat(False)
+                    self.board[i][j].modif_road("angle")
+                elif i%2 == 0 and j%2==0:
+                    self.board[i][j].modif_stat(False)
+                else:
+                    self.board[i][j].modif_stat(True)
+        
+        for x in range(7) :
+            for y in range(7) :
+                self.all_tile.append(self.board[x][y])
+        self.all_tile.append(self.out_tile)
+        
         self.card.random()
         if nb_joueur == 1 :
             pass
@@ -51,6 +70,20 @@ class Plato :
             self.j2 = Perso(2, self.card.liste[6:12])
             self.j3 = Perso(3, self.card.liste[12:18])
             self.j4 = Perso(4, self.card.liste[18:])
+            
+        def jouable(self, rank) :
+            return rank%2 != 0
+        
+        def move(self, rank, start, ID) :
+            if self.jouable(rank) == True :
+                if start == 'down' :
+                    for i in range(6) :
+                        self.board[i][rank], self.board[i+1][rank] = self.board[i+1][rank], self.board[i][rank]
+                    self.board[7][rank], self.out_tile = self.out_tile, self.board[7][rank]
+                elif start == 'up' :
+                    for i in range(0, 6, -1) :
+                        self.board[i][rank], self.board[i+1][rank] = self.board[i+1][rank], self.board[i][rank]
+                    self.board[0][rank], self.out_tile = self.out_tile, self.board[0][rank]
                 
 
 class Tile :
@@ -60,7 +93,7 @@ class Tile :
         Cette class associe les toutes les valeurs (information) nécessaire pour les différencié et les utilisé
         Parameters
         ----------
-        fix : BOOLEAN
+        fix : BOOL
             | True = peut bouger | False = reste fix  |
             
         ID : INT
@@ -148,8 +181,6 @@ class Card :
         for i in range(0,24) :
             a, b = randint(0,23), randint(0,23)
             self.liste[a], self.liste[b] = self.liste[b], self.liste[a]
-            
-         
             
 
 class Pile :
