@@ -44,8 +44,6 @@ def widgetAt(p, pos):
 	return None
 
 class Tile(QLabel):
-	"""
-	"""
 	def __init__(self, d, parent = None):
 		super(Tile, self).__init__(parent)
 		self.setFixedSize(70, 70)
@@ -79,7 +77,7 @@ class Tile(QLabel):
 		"""
 		pass
 
-	def internalData(self, d):
+	def setInternalData(self, d):
 		"""
 		Set the internal data of the tile.
 
@@ -204,6 +202,7 @@ class Tile(QLabel):
 			upd = self.mapToParent(event.pos())
 			return super(Tile, self).mouseReleaseEvent(event)
 
+#Generate the list of poligons used for the input tiles.
 arrows = {}
 p = QPolygonF()
 p << QPointF(35, 10) << QPointF(10, 60) << QPointF(60, 60)
@@ -241,6 +240,19 @@ class InputTile(Tile):
 		self._path = path
 
 	def tileEvent(self, is_in):
+		"""
+		Handles tile hovers by another one.
+
+		Parameters
+		----------
+		is_in : bool
+			True if the tile enters, False if going out.
+
+		Returns
+		-------
+		None.
+
+		"""
 		if is_in and not self.tile_hovered:
 			self.tile_hovered = True
 			self.repaint()
@@ -248,36 +260,20 @@ class InputTile(Tile):
 			self.tile_hovered = False
 			self.repaint()
 
-	def enterEvent(self, event):
+	def paintEvent(self, ev):
 		"""
-
+		Painting handler.
 
 		Parameters
 		----------
-		event : TYPE
-			DESCRIPTION.
+		ev : QPaintEvent
+			The input event.
 
 		Returns
 		-------
-		TYPE
-			DESCRIPTION.
+		None.
 
 		"""
-		#Get the upper tile
-		upd = self.mapToParent(event.pos())
-		if (self.x() <= upd.x() and self.x()+self.width() >= upd.x()) and (self.y() <= upd.y() and self.y()+self.height() >= upd.y()):
-			if not self.tile_hovered:
-				self.tile_hovered = True
-				self.repaint()
-		return super(InputTile, self).enterEvent(event)
-
-	def leaveEvent(self, event):
-		if self.tile_hovered:
-			self.tile_hovered = False
-			self.repaint()
-		return super(InputTile, self).leaveEvent(event)
-
-	def paintEvent(self, ev):
 		painter = QPainter()
 		painter.begin(self)
 		if self.tile_hovered:

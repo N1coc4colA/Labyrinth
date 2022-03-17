@@ -16,6 +16,14 @@ class Board(QWidget):
 		self.input_tiles = []
 
 	def load(self):
+		"""
+		Sets up all the tiles that goes with the board.
+
+		Returns
+		-------
+		None.
+
+		"""
 		#Fill with the main tiles
 		for x in range(7):
 			l = []
@@ -48,7 +56,27 @@ class Board(QWidget):
 		t.setMovable(True)
 		t.move(50, 50)
 
+	def setTilesData(self, dl):
+		i = 0
+		for l in self.tiles:
+			for t in l:
+				t.setInternalData(dl[i])
+				i+=1
+
 	def resizeEvent(self, event):
+		"""
+		Used to handle resize events and layout the board.
+
+		Parameters
+		----------
+		event : QResizeEvent
+			The input event.
+
+		Returns
+		-------
+		None.
+
+		"""
 		w = (event.size().width() - 630)/2
 		h = (event.size().height() - 630)/2
 
