@@ -51,7 +51,6 @@ class Tile(QLabel):
 		self.setLineWidth(1)
 		self.setMidLineWidth(3)
 		self.setMouseTracking(True)
-		self.setText("A")
 
 		self.movable = False
 		self.press = False
@@ -234,7 +233,6 @@ class InputTile(Tile):
 	def __init__(self, d, parent = None):
 		super(InputTile, self).__init__(d, parent)
 		self.tile_hovered = False
-		self.setText("B")
 		path = QPainterPath()
 		path.addPolygon(get_arrows()[d.orientation])
 		self._path = path
