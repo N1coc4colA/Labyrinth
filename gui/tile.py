@@ -1,19 +1,51 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QApplication
 
 def ensureRaised(w):
+	"""
+	Ensures that the widget is at the top.
+
+	Parameters
+	----------
+	w : QWidget
+		Widget meant to be raised.
+
+	Returns
+	-------
+	None.
+
+	"""
 	#Ensures this draggable is the one at the top-front, so it is no hidden when dragged. Max tiles is 9, plus the congrats popup, so do it 9-1 times.
 	for i in range(9):
 		w.raise_()
 
 def widgetAt(p, pos):
+	"""
+	Get the widget at a position.
+
+	Parameters
+	----------
+	p : QWidget
+		A widget to escape.
+	pos : QPoint
+		Target point.
+
+	Returns
+	-------
+	w : TYPE
+		DESCRIPTION.
+
+	"""
 	for w in p.parentWidget().children():
-		if (p.x() <= pos.x() and p.x()+p.width() >= pos.x()) and (p.y() <= pos.y() and p.y()+p.height() >= pos.y()) and w != p:
-			return p
+		if (w.x() <= pos.x() and w.x()+w.width() >= pos.x()) and (w.y() <= pos.y() and w.y()+w.height() >= pos.y()) and w != p:
+			return w
+	return None
 
 class Tile(QLabel):
+	"""
+	"""
 	def __init__(self, d, parent = None):
 		super(Tile, self).__init__(parent)
 		self.setFixedSize(70, 70)
@@ -29,25 +61,98 @@ class Tile(QLabel):
 		self.source = QPointF(0, 0)
 		self._id = -1
 		self._data = d
+		self.o_target = None
+
+	def tileEvent(self, is_in):
+		"""
+		Not implemented. Reimplement it to receive mouse enter/leave signals when a movable tile hovers this one.
+
+		Parameters
+		----------
+		is_in : bool
+			DESCRIPTION.
+
+		Returns
+		-------
+		None.
+
+		"""
+		pass
 
 	def internalData(self, d):
+		"""
+		Set the internal data of the tile.
+
+		Parameters
+		----------
+		d : Unknown.
+			The data holder.
+
+		"""
 		self._data = d
 		self.update()
 
 	def setMovable(self, mv):
+		"""
+		Change the ability of the tile to be moved.
+
+		Parameters
+		----------
+		mv : bool
+			Enable the hold tile behaviour on True
+
+		Returns
+		-------
+		None.
+
+		"""
 		self.movable = mv
 		self.press = False
 		self.move(self.source.x(), self.source.y())
 
 	def mouseMoveEvent(self, event):
+		"""
+		Handle mouse move events properly to get a drag behaviour.
+
+		Parameters
+		----------
+		event : QMouseMoveEvent
+			The input event.
+
+		Returns
+		-------
+		None.
+
+		"""
 		if self.press and self.movable:
 			#Track to move
 			upd = self.mapToParent(event.pos())
 			final = QPoint(upd.x() - self.diff[0], upd.y() - self.diff[1])
 			self.move(final)
+			#If there was a previous target, notify it that we're leaving it.
+			if self.o_target:
+				self.o_target.tileEvent(False)
+			#Dispatch the notification to tell that the tile behind have been entered.
+			self.o_target = widgetAt(self, upd)
+			if self.o_target != None and isinstance(self.o_target, InputTile):
+				self.o_target.tileEvent(True)
+				return
 		return super(Tile, self).mouseMoveEvent(event)
 
 	def moveEvent(self, event):
+		"""
+		Handle tile's move in an approriate way.
+
+		Parameters
+		----------
+		event : QMoveEvent
+			The input event.
+
+		Returns
+		-------
+		None.
+
+		"""
 		if not self.press:
 			#Update when the move is a 'normal' one, used while changing game board with anims mainly.
 			self.source = self.mapToParent(self.pos())
@@ -59,6 +164,19 @@ class Tile(QLabel):
 				w.repaint()
 
 	def mousePressEvent(self, event):
+		"""
+		Handle mouse press events and change tile's behaviour depending on it.
+
+		Parameters
+		----------
+		event : QMouseEvent
+			The input event.
+
+		Returns
+		-------
+		None.
+
+		"""
 		if self.isEnabled() and self.movable:
 			ensureRaised(self) #Shows the widget at top
 			self.press = True
@@ -68,6 +186,19 @@ class Tile(QLabel):
 		return super(Tile, self).mousePressEvent(event)
 
 	def mouseReleaseEvent(self, event):
+		"""
+		Handles release event to get the right drag behaviour.
+
+		Parameters
+		----------
+		event : QmouseReleaseEvent
+			The input event.
+
+		Returns
+		-------
+		None.
+
+		"""
 		if self.press and self.movable:
 			self.press = False
 			upd = self.mapToParent(event.pos())
@@ -88,6 +219,15 @@ p << QPointF(10, 35) << QPointF(60, 10) << QPointF(60, 60)
 arrows[3] = p
 
 def get_arrows():
+	"""
+	Get polygons used as arrows (left, right, up and down).
+
+	Returns
+	-------
+	arrows : list
+		List of QPolygon.
+
+	"""
 	global arrows
 	return arrows
 
@@ -100,20 +240,42 @@ class InputTile(Tile):
 		path.addPolygon(get_arrows()[d.orientation])
 		self._path = path
 
-	def mouseMoveEvent(self, event):
+	def tileEvent(self, is_in):
+		if is_in and not self.tile_hovered:
+			self.tile_hovered = True
+			self.repaint()
+		elif not is_in and self.tile_hovered:
+			self.tile_hovered = False
+			self.repaint()
+
+	def enterEvent(self, event):
+		"""
+
+
+		Parameters
+		----------
+		event : TYPE
+			DESCRIPTION.
+
+		Returns
+		-------
+		TYPE
+			DESCRIPTION.
+
+		"""
 		#Get the upper tile
 		upd = self.mapToParent(event.pos())
 		if (self.x() <= upd.x() and self.x()+self.width() >= upd.x()) and (self.y() <= upd.y() and self.y()+self.height() >= upd.y()):
 			if not self.tile_hovered:
 				self.tile_hovered = True
 				self.repaint()
-			else:
-				self.tile_hovered = False
-				self.repaint()
-		elif self.tile_hovered:
+		return super(InputTile, self).enterEvent(event)
+
+	def leaveEvent(self, event):
+		if self.tile_hovered:
 			self.tile_hovered = False
 			self.repaint()
-		return super(InputTile, self).mouseMoveEvent(event)
+		return super(InputTile, self).leaveEvent(event)
 
 	def paintEvent(self, ev):
 		painter = QPainter()
