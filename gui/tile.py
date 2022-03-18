@@ -51,13 +51,14 @@ class Tile(QLabel):
 		self.setLineWidth(1)
 		self.setMidLineWidth(3)
 		self.setMouseTracking(True)
+		self.setInternalData(d)
 
 		self.movable = False
 		self.press = False
 		self.diff = (0, 0)
 		self.source = QPointF(0, 0)
 		self._id = -1
-		self._data = d
+		self._data = None
 		self.o_target = None
 
 	def tileEvent(self, is_in):
@@ -87,6 +88,7 @@ class Tile(QLabel):
 
 		"""
 		self._data = d
+		self.setPixmap(d.pixmap.scaled(self.width(), self.height()))
 		self.update()
 
 	def setMovable(self, mv):
@@ -279,4 +281,3 @@ class InputTile(Tile):
 		painter.fillPath(self._path, QBrush(Qt.yellow))
 		painter.end()
 		return super(InputTile, self).paintEvent(ev)
-

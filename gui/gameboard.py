@@ -7,6 +7,7 @@ from gui.tile import Tile, InputTile
 class TestData:
 	def __init__(self, o = 0):
 		self.orientation = o
+		self.pixmap = QPixmap()
 
 class Board(QWidget):
 	def __init__(self, parent = None):
@@ -57,11 +58,9 @@ class Board(QWidget):
 		t.move(50, 50)
 
 	def setTilesData(self, dl):
-		i = 0
-		for l in self.tiles:
-			for t in l:
-				t.setInternalData(dl[i])
-				i+=1
+		for i in range(7):
+			for j in range(7):
+				self.tiles[i][j].setInternalData(dl[i][j])
 
 	def resizeEvent(self, event):
 		"""
