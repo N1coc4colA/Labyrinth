@@ -11,46 +11,18 @@ class Plato :
         
         self.out_tile = Tile(True, 49, 'line')  #road et objet vont changer
         self.board = [[Tile(True, i+j*7, 'line') for i in range(self.width)]for j in range(self.height)]
-        """
-        for i in range(self.height) :
-            for j in range(self.width) :
-                if i == 0 and j == 0 :                  # initialisation of spwan 1 
-                    self.board[i][j].modif_stat(False)
-                    self.board[i][j].modif_color(1)
-                    self.board[i][j].modif_road('angle')
-                    
-                elif i == 0 and j == 7 :                  # initialisation of spwan 2
-                    self.board[i][j].modif_stat(False)
-                    self.board[i][j].modif_color(2)
-                    self.board[i][j].modif_road('angle')
-                    self.board[i][j].modif_orientation(1)
-                    
-                elif i == 7 and j == 0 :                  # initialisation of spwan 3
-                    self.board[i][j].modif_stat(False)
-                    self.board[i][j].modif_color(3)
-                    self.board[i][j].modif_road('angle')
-                    self.board[i][j].modif_orientation(2)
-                    
-                elif i == 7 and j == 7 :                  # initialisation of spwan 4
-                    self.board[i][j].modif_stat(False)
-                    self.board[i][j].modif_color(4)
-                    self.board[i][j].modif_road('angle')
-                    self.board[i][j].modif_orientation(3)
-                    
-                elif self.board[i][j].get_id()%2 == 1 :  # initialisation des cases inpaires
-                    self.board[i][j].modif_stat(False)
-                    self.board[i][j].modif_road('triple')
-        
         for i in range(self.width):
             for j in range(self.height):
                 if (i == 0 or i == self.width-1) and (j == 0 or j == self.height-1):
                     self.board[i][j].modif_stat(False)
                     self.board[i][j].modif_road("angle")
-                elif i%2 == 0 and j%2==0:
+                    self.board[i][j].modif_color((j + i*2)//7+1)
+                    self.board[i][j].modif_orientation((j + i*2)//7)
+                elif i%2==0 and j%2==0:
                     self.board[i][j].modif_stat(False)
+                    self.board[i][j].modif_road('triple')
                 else:
                     self.board[i][j].modif_stat(True)
-        """
         
         for x in range(7) :
             for y in range(7) :
@@ -129,12 +101,14 @@ class Tile :
         -------
         None.
         """
+        self.pixmap = QPixmap("./images/tile_" + str(ID) + ".png")
         self.item = objet
         self.stat = fix
         self.spawn = color
         self._id = ID
         self.road = road
         self.orientation = 0       # orientation | 0 = 0° | 1 = 90° | 2 = 180° | 3 = 270° |
+
         self.open = []
         self.find_open()
     
