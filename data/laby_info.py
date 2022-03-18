@@ -11,6 +11,7 @@ class Plato :
         
         self.out_tile = Tile(True, 49, 'line')  #road et objet vont changer
         self.board = [[Tile(True, i+j*7, 'line') for i in range(self.width)]for j in range(self.height)]
+        """
         for i in range(self.height) :
             for j in range(self.width) :
                 if i == 0 and j == 0 :                  # initialisation of spwan 1 
@@ -22,16 +23,19 @@ class Plato :
                     self.board[i][j].modif_stat(False)
                     self.board[i][j].modif_color(2)
                     self.board[i][j].modif_road('angle')
+                    self.board[i][j].modif_orientation(1)
                     
                 elif i == 7 and j == 0 :                  # initialisation of spwan 3
                     self.board[i][j].modif_stat(False)
                     self.board[i][j].modif_color(3)
                     self.board[i][j].modif_road('angle')
+                    self.board[i][j].modif_orientation(2)
                     
                 elif i == 7 and j == 7 :                  # initialisation of spwan 4
                     self.board[i][j].modif_stat(False)
                     self.board[i][j].modif_color(4)
                     self.board[i][j].modif_road('angle')
+                    self.board[i][j].modif_orientation(3)
                     
                 elif self.board[i][j].get_id()%2 == 1 :  # initialisation des cases inpaires
                     self.board[i][j].modif_stat(False)
@@ -46,6 +50,7 @@ class Plato :
                     self.board[i][j].modif_stat(False)
                 else:
                     self.board[i][j].modif_stat(True)
+        """
         
         for x in range(7) :
             for y in range(7) :
@@ -55,7 +60,7 @@ class Plato :
         self.card.random()
         if nb_joueur == 1 :
             pass
-                    #☺on verra plus tard pour le nombre de bot---------------------------------------------------------------------------------------------
+                    # ☺ on verra plus tard pour le nombre de bot---------------------------------------------------------------------------------------------
         elif nb_joueur == 2 :
             self.j1 = Perso(1, self.card.liste[:12])
             self.j2 = Perso(3, self.card.liste[12:])
@@ -71,19 +76,30 @@ class Plato :
             self.j3 = Perso(3, self.card.liste[12:18])
             self.j4 = Perso(4, self.card.liste[18:])
             
-        def jouable(self, rank) :
-            return rank%2 != 0
+    def jouable(self, rank) :
+        return rank%2 != 0
         
-        def move(self, rank, start, ID) :
-            if self.jouable(rank) == True :
-                if start == 'down' :
-                    for i in range(6) :
-                        self.board[i][rank], self.board[i+1][rank] = self.board[i+1][rank], self.board[i][rank]
-                    self.board[7][rank], self.out_tile = self.out_tile, self.board[7][rank]
-                elif start == 'up' :
-                    for i in range(0, 6, -1) :
-                        self.board[i][rank], self.board[i+1][rank] = self.board[i+1][rank], self.board[i][rank]
-                    self.board[0][rank], self.out_tile = self.out_tile, self.board[0][rank]
+    def move(self, rank, start, ID) :
+        if self.jouable(rank) == True :
+            if start == 'down' :
+                for i in range(6) :
+                    self.board[i][rank], self.board[i+1][rank] = self.board[i+1][rank], self.board[i][rank]
+                self.board[6][rank], self.out_tile = self.out_tile, self.board[6][rank]
+                
+            elif start == 'up' :
+                for i in range(6, 0, -1) :
+                    self.board[i][rank], self.board[i-1][rank] = self.board[i-1][rank], self.board[i][rank]
+                self.board[0][rank], self.out_tile = self.out_tile, self.board[0][rank]
+                
+            elif start == 'left' :
+                for i in range(6) :
+                    self.board[rank][i], self.board[rank][i+1] = self.board[rank][i+1], self.board[rank][i]
+                self.board[rank][6], self.out_tile = self.out_tile, self.board[rank][6]
+                
+            elif start == 'right' :
+                for i in range(6, 0, -1) :
+                    self.board[rank][i], self.board[rank][i-1] = self.board[rank][i-1], self.board[rank][i]
+                self.board[rank][0], self.out_tile = self.out_tile, self.board[rank][0]
                 
 
 class Tile :
@@ -119,6 +135,8 @@ class Tile :
         self._id = ID
         self.road = road
         self.orientation = 0       # orientation | 0 = 0° | 1 = 90° | 2 = 180° | 3 = 270° |
+        self.open = []
+        self.find_open()
     
     def get_id(self) :
         return self._id
@@ -153,6 +171,46 @@ class Tile :
     def modif_orientation(self, orientation) :
         self.orientation = orientation
         
+    def find_open(self) :
+        if self.road =='line' :
+            if self.orientation in (0, 2) :
+                self.open.append('north')
+                self.open.append('south')
+            elif self.orientation in (1, 3) :
+                self.open.append('north')
+                self.open.append('south')
+            
+        if self.road == 'angle' :
+            if self.orientation == 0 :
+                self.open.append('south')
+                self.open.append('est')
+            elif self.orientation == 1 :
+                self.open.append('south')
+                self.open.append('ouest')
+            elif self.orientation == 2 :
+                self.open.append('north')
+                self.open.append('ouest')
+            elif self.orientation == 3 :
+                self.open.append('north')
+                self.open.append('est')
+            
+        if self.road == 'triple' :
+            if self.orientation == 0 :
+                self.open.append('north')
+                self.open.append('est')
+                self.open.append('south')
+            elif self.orientation == 1 :
+                self.open.append('ouest')
+                self.open.append('est')
+                self.open.append('south')
+            elif self.orientation == 2 :
+                self.open.append('north')
+                self.open.append('ouest')
+                self.open.append('south')
+            elif self.orientation == 3 :
+                self.open.append('north')
+                self.open.append('ouest')
+                self.open.append('est')
 
 class Perso :
     def __init__(self, color, pile) :
