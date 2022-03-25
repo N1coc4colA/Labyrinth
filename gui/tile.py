@@ -88,7 +88,10 @@ class Tile(QLabel):
 
 		"""
 		self._data = d
-		self.setPixmap(d.pixmap.scaled(self.width(), self.height()))
+		if not d.pixmap.isNull():
+			self.setPixmap(d.pixmap.scaled(self.width(), self.height()))
+		else:
+			self.pixmap = d.pixmap
 		self.update()
 
 	def setMovable(self, mv):

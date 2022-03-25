@@ -15,6 +15,11 @@ class Board(QWidget):
 		self.setMinimumSize(630, 630)
 		self.tiles = []
 		self.input_tiles = []
+		self.backend = None
+
+	def setBackend(self, bkd):
+		self.backend = bkd
+		self.setTilesData(bkd.board)
 
 	def load(self):
 		"""
@@ -58,7 +63,6 @@ class Board(QWidget):
 		t.move(50, 50)
 
 	def setTilesData(self, dl):
-		print("Setting tiles' data.")
 		for i in range(7):
 			for j in range(7):
 				self.tiles[i][j].setInternalData(dl[i][j])
