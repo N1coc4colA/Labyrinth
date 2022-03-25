@@ -63,7 +63,15 @@ class Plato :
                 for i in range(0, 6, -1) :
                     self.board[i][rank], self.board[i+1][rank] = self.board[i+1][rank], self.board[i][rank]
                 self.board[0][rank], self.out_tile = self.out_tile, self.board[0][rank]
+            elif start == 'left' :
+                for i in range(6) :
+                    self.board[rank][i], self.board[rank][i+1] = self.board[rank][i+1], self.board[rank][i]
+                self.board[rank][6], self.out_tile = self.out_tile, self.board[rank][6]
 
+            elif start == 'right' :
+                for i in range(6, 0, -1) :
+                    self.board[rank][i], self.board[rank][i-1] = self.board[rank][i-1], self.board[rank][i]
+                self.board[rank][0], self.out_tile = self.out_tile, self.board[rank][0]
 class Tile :
     def __init__(self, fix, ID, road, objet = None, color = 0) :
         """
@@ -91,18 +99,19 @@ class Tile :
         -------
         None.
         """
-        print(ID)
+
         self.pixmap = QPixmap("./images/tile_" + str(ID) + ".png")
-        if (self.pixmap.isNull()):
-        	print("Error: unable to load: ./images/title_"+str(ID)+".png")
-        else:
-        	print("Image properly loaded.")
         self.item = objet
         self.stat = fix
         self.spawn = color
         self._id = ID
         self.road = road
         self.orientation = 0       # orientation | 0 = 0° | 1 = 90° | 2 = 180° | 3 = 270° |
+        self.open = []
+        self.find_open()
+
+    def jouable(self, rank) :
+        return rank%2 != 0
 
     def get_id(self) :
         return self._id
@@ -136,6 +145,48 @@ class Tile :
 
     def modif_orientation(self, orientation) :
         self.orientation = orientation
+
+    def find_open(self) :
+        if self.road =='line' :
+            if self.orientation in (0, 2) :
+                self.open.append('north')
+                self.open.append('south')
+            elif self.orientation in (1, 3) :
+                self.open.append('north')
+                self.open.append('south')
+
+        if self.road == 'angle' :
+            if self.orientation == 0 :
+                self.open.append('south')
+                self.open.append('est')
+            elif self.orientation == 1 :
+                self.open.append('south')
+                self.open.append('ouest')
+            elif self.orientation == 2 :
+                self.open.append('north')
+                self.open.append('ouest')
+            elif self.orientation == 3 :
+                self.open.append('north')
+                self.open.append('est')
+
+        if self.road == 'triple' :
+            if self.orientation == 0 :
+                self.open.append('north')
+                self.open.append('est')
+                self.open.append('south')
+            elif self.orientation == 1 :
+                self.open.append('ouest')
+                self.open.append('est')
+                self.open.append('south')
+            elif self.orientation == 2 :
+                self.open.append('north')
+                self.open.append('ouest')
+                self.open.append('south')
+            elif self.orientation == 3 :
+                self.open.append('north')
+                self.open.append('ouest')
+                self.open.append('est')
+
 
 
 class Perso :
