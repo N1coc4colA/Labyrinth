@@ -58,6 +58,7 @@ class Board(QWidget):
 		t.move(50, 50)
 
 	def setTilesData(self, dl):
+		print("Setting tiles' data.")
 		for i in range(7):
 			for j in range(7):
 				self.tiles[i][j].setInternalData(dl[i][j])
