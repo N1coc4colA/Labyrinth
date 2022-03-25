@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 from random import randint
+from PyQt5.QtGui import QPixmap
 
 class Plato :
-    def __init__(self, nb_joueur) : #||||||||||||||||||||||||| mieux organiser la répartition des directions des chemin |||||||||||||||||||||||||||||||||||| 
+    def __init__(self, nb_joueur) : #||||||||||||||||||||||||| mieux organiser la répartition des directions des chemins ||||||||||||||||||||||||||||||||||||
         self.height = 7
         self.width = 7
-        
+
         self.card = Card()
         self.all_tile = []
-        
-        self.out_tile = Tile(True, 49, 'line')  #road et objet vont changer
-        self.board = [[Tile(True, i+j*7, 'line') for i in range(self.width)]for j in range(self.height)]
+
+        self.board = [[Tile(True, i+j*7, 'line') for i in range(self.width)] for j in range(self.height)]
+        self.out_tile = self.board[6][6]  #road et objet vont changer
+
         for i in range(self.width):
             for j in range(self.height):
                 if (i == 0 or i == self.width-1) and (j == 0 or j == self.height-1):
@@ -23,59 +25,47 @@ class Plato :
                     self.board[i][j].modif_road('triple')
                 else:
                     self.board[i][j].modif_stat(True)
-        
+
         for x in range(7) :
             for y in range(7) :
                 self.all_tile.append(self.board[x][y])
         self.all_tile.append(self.out_tile)
-        
+
         self.card.random()
         if nb_joueur == 1 :
             pass
-                    # ☺ on verra plus tard pour le nombre de bot---------------------------------------------------------------------------------------------
+                    #☺on verra plus tard pour le nombre de bots---------------------------------------------------------------------------------------------
         elif nb_joueur == 2 :
             self.j1 = Perso(1, self.card.liste[:12])
             self.j2 = Perso(3, self.card.liste[12:])
-            
+
         elif nb_joueur == 3 :
             self.j1 = Perso(1, self.card.liste[:5])
             self.j2 = Perso(2, self.card.liste[6:12])
             self.j3 = Perso(3, self.card.liste[12:18])
-            
+
         elif nb_joueur == 4 :
             self.j1 = Perso(1, self.card.liste[:6])
             self.j2 = Perso(2, self.card.liste[6:12])
             self.j3 = Perso(3, self.card.liste[12:18])
             self.j4 = Perso(4, self.card.liste[18:])
-            
+
     def jouable(self, rank) :
         return rank%2 != 0
-        
+
     def move(self, rank, start, ID) :
         if self.jouable(rank) == True :
             if start == 'down' :
                 for i in range(6) :
-                    self.board[i][rank], self.board[i+1][rank] = self.board[i+1][rank], self.board[i][rank]
-                self.board[6][rank], self.out_tile = self.out_tile, self.board[6][rank]
-                
+            	    self.board[i][rank], self.board[i+1][rank] = self.board[i+1][rank], self.board[i][rank]
+                self.board[7][rank], self.out_tile = self.out_tile, self.board[7][rank]
             elif start == 'up' :
-                for i in range(6, 0, -1) :
-                    self.board[i][rank], self.board[i-1][rank] = self.board[i-1][rank], self.board[i][rank]
+                for i in range(0, 6, -1) :
+                    self.board[i][rank], self.board[i+1][rank] = self.board[i+1][rank], self.board[i][rank]
                 self.board[0][rank], self.out_tile = self.out_tile, self.board[0][rank]
-                
-            elif start == 'left' :
-                for i in range(6) :
-                    self.board[rank][i], self.board[rank][i+1] = self.board[rank][i+1], self.board[rank][i]
-                self.board[rank][6], self.out_tile = self.out_tile, self.board[rank][6]
-                
-            elif start == 'right' :
-                for i in range(6, 0, -1) :
-                    self.board[rank][i], self.board[rank][i-1] = self.board[rank][i-1], self.board[rank][i]
-                self.board[rank][0], self.out_tile = self.out_tile, self.board[rank][0]
-                
 
 class Tile :
-    def __init__(self, fix, ID, road, objet = None, color = 0) : 
+    def __init__(self, fix, ID, road, objet = None, color = 0) :
         """
         Cette class initialise des tuile carré qui vont fassoné le labyrinte.
         Cette class associe les toutes les valeurs (information) nécessaire pour les différencié et les utilisé
@@ -83,25 +73,30 @@ class Tile :
         ----------
         fix : BOOL
             | True = peut bouger | False = reste fix  |
-            
+
         ID : INT
             DESCRIPTION.
-            
+
         road : STR
             |  'line' = ligne droite  |  'angle' = virage  |  'triple' = triple sens  |
-            
+
         objet : STR, optional
             nom de l'objet qui se situe sur la case, si il y en a un. The default is None.
-            
+
         color : INT, optional
             | 0 = pas de spawn | 1 = spwan 'blanc' | 2 = spawn 'turquoise' | 3 = spwn 'noir' | 4 = spawn 'violet' |
             The default is 0.
-            
+
         Returns
         -------
         None.
         """
+        print(ID)
         self.pixmap = QPixmap("./images/tile_" + str(ID) + ".png")
+        if (self.pixmap.isNull()):
+        	print("Error: unable to load: ./images/title_"+str(ID)+".png")
+        else:
+        	print("Image properly loaded.")
         self.item = objet
         self.stat = fix
         self.spawn = color
@@ -109,82 +104,39 @@ class Tile :
         self.road = road
         self.orientation = 0       # orientation | 0 = 0° | 1 = 90° | 2 = 180° | 3 = 270° |
 
-        self.open = []
-        self.find_open()
-    
     def get_id(self) :
         return self._id
-    
+
     def get_item(self) :
         return self.item
-    
+
     def get_stat(self) :
         return self.stat()
-    
+
     def get_spawn(self) :
         return self.spawn
-    
+
     def get_road(self) :
         return self.road
-    
+
     def get_orientation(self) :
         return self.orientation
-    
+
     def modif_item(self, item) :
         self.item = item
-    
+
     def modif_stat(self, stat) :
         self.stat = stat
-    
+
     def modif_color(self, color) :
         self.spawn = color
-        
+
     def modif_road(self, road) :
         self.road = road
-        
+
     def modif_orientation(self, orientation) :
         self.orientation = orientation
-        
-    def find_open(self) :
-        if self.road =='line' :
-            if self.orientation in (0, 2) :
-                self.open.append('north')
-                self.open.append('south')
-            elif self.orientation in (1, 3) :
-                self.open.append('north')
-                self.open.append('south')
-            
-        if self.road == 'angle' :
-            if self.orientation == 0 :
-                self.open.append('south')
-                self.open.append('est')
-            elif self.orientation == 1 :
-                self.open.append('south')
-                self.open.append('ouest')
-            elif self.orientation == 2 :
-                self.open.append('north')
-                self.open.append('ouest')
-            elif self.orientation == 3 :
-                self.open.append('north')
-                self.open.append('est')
-            
-        if self.road == 'triple' :
-            if self.orientation == 0 :
-                self.open.append('north')
-                self.open.append('est')
-                self.open.append('south')
-            elif self.orientation == 1 :
-                self.open.append('ouest')
-                self.open.append('est')
-                self.open.append('south')
-            elif self.orientation == 2 :
-                self.open.append('north')
-                self.open.append('ouest')
-                self.open.append('south')
-            elif self.orientation == 3 :
-                self.open.append('north')
-                self.open.append('ouest')
-                self.open.append('est')
+
 
 class Perso :
     def __init__(self, color, pile) :
@@ -198,36 +150,36 @@ class Perso :
             self.location = (7, 7)
         elif self.color == 4 :
             self.location = (0, 7)
-        
+
     def get_location(self) :
         return self.location
-    
+
     def modif_location(self, x, y) :
         self.location = (x, y)
 
 class Card :
     def __init__(self) :
         self.liste = ["Pringles", "Dragon", "Passoire", "Langouste", "Bouteille", "Apple", "Ring", "LaserSaber", "PiderPig", "Covid", "Grale", "Meme", "Meme", "Kassos", "The Clap", "Batman", "Sun", "Homer", "Elon Musk", "Peery", "Pigeon", "Idefix", "Eye of Sauron", "oooooooooooo"]
-         
+
     def random(self) :
         for i in range(0,24) :
             a, b = randint(0,23), randint(0,23)
             self.liste[a], self.liste[b] = self.liste[b], self.liste[a]
-            
+
 
 class Pile :
     def __init__(self) :
         self.pile = []
-    
+
     def append(self, add) :
         self.pile.append(add)
-    
+
     def pop(self):
         self.pile.pop(len(self.pile))
-        
+
     def len_(self) :
         return len(self.pile)
-    
 
-        
+
+
 game = Plato(4)
