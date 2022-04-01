@@ -77,6 +77,9 @@ class Tile(QLabel):
 		"""
 		pass
 
+	def tileRelease(self, tile):
+		pass
+
 	def setInternalData(self, d):
 		"""
 		Set the internal data of the tile.
@@ -204,6 +207,10 @@ class Tile(QLabel):
 		if self.press and self.movable:
 			self.press = False
 			upd = self.mapToParent(event.pos())
+			#If there's a tile under, make it handle the release tile.
+			w = widgetAt(self, upd)
+			if w and isinstance(w, InputTile):
+				w.tileRelease(self)
 			return super(Tile, self).mouseReleaseEvent(event)
 
 #Generate the list of poligons used for the input tiles.
@@ -262,6 +269,9 @@ class InputTile(Tile):
 		elif not is_in and self.tile_hovered:
 			self.tile_hovered = False
 			self.repaint()
+
+	def tileRelease(self, tile):
+		self.parentWidget().tileInsertion(self, tile)
 
 	def paintEvent(self, ev):
 		"""
