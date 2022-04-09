@@ -32,46 +32,121 @@ class Plato :
         self.all_tile.append(self.out_tile)
 
         self.card.random()
+        self.player = []
         if nb_joueur == 1 :
             pass
                     #☺on verra plus tard pour le nombre de bots---------------------------------------------------------------------------------------------
         elif nb_joueur == 2 :
             self.j1 = Perso(1, self.card.liste[:12])
             self.j2 = Perso(3, self.card.liste[12:])
+            self.player.append(self.j1)
+            self.player.append(self.j2)
 
         elif nb_joueur == 3 :
             self.j1 = Perso(1, self.card.liste[:5])
             self.j2 = Perso(2, self.card.liste[6:12])
             self.j3 = Perso(3, self.card.liste[12:18])
+            self.player.append(self.j1)
+            self.player.append(self.j2)
+            self.player.append(self.j3)
 
         elif nb_joueur == 4 :
             self.j1 = Perso(1, self.card.liste[:6])
             self.j2 = Perso(2, self.card.liste[6:12])
             self.j3 = Perso(3, self.card.liste[12:18])
             self.j4 = Perso(4, self.card.liste[18:])
+            self.player.append(self.j1)
+            self.player.append(self.j2)
+            self.player.append(self.j3)
+            self.player.append(self.j4)
+            
 
     def jouable(self, rank) :
+        """
+        cette méthode vérifie si la colonne ou la ligne selectionner par le joueur est jouable
+
+        Parameters
+        ----------
+        rank : INT
+
+        Returns
+        -------
+        BOOL
+            
+        """
         return rank%2 != 0
 
-    def move(self, rank, start, ID) :
+    def move(self, rank, start) :
+        """
+        cette méthode permet au joueur de bouger le labirinte dans le sens qu'il veut 
+
+        Parameters
+        ----------
+        rank : INT
+            la viriable qui indique quel colonne va se déplacer
+        start : STR
+            la variablle qui indique le sens de déplacement du labirinte
+
+        Returns
+        -------
+        None.
+
+        """
         if self.jouable(rank) == True :
             if start == 'down' :
                 for i in range(6) :
             	    self.board[i][rank], self.board[i+1][rank] = self.board[i+1][rank], self.board[i][rank]
                 self.board[7][rank], self.out_tile = self.out_tile, self.board[7][rank]
+                for i in self.player :
+                    if i.location == (rank, 7) :
+                        i.modif_location(rank, 0)
             elif start == 'up' :
                 for i in range(0, 6, -1) :
                     self.board[i][rank], self.board[i+1][rank] = self.board[i+1][rank], self.board[i][rank]
                 self.board[0][rank], self.out_tile = self.out_tile, self.board[0][rank]
+                for i in self.player :
+                    if i.location == (rank, 0) :
+                        i.modif_location(rank, 7)
             elif start == 'left' :
                 for i in range(6) :
                     self.board[rank][i], self.board[rank][i+1] = self.board[rank][i+1], self.board[rank][i]
                 self.board[rank][6], self.out_tile = self.out_tile, self.board[rank][6]
-
+                for i in self.player :
+                    if i.location == (7, rank) :
+                        i.modif_location(0, rank)
             elif start == 'right' :
                 for i in range(6, 0, -1) :
                     self.board[rank][i], self.board[rank][i-1] = self.board[rank][i-1], self.board[rank][i]
                 self.board[rank][0], self.out_tile = self.out_tile, self.board[rank][0]
+                for i in self.player :
+                    if i.location == (0, rank) :
+                        i.modif_location(7, rank)
+                        
+    def graph(self) :
+        for x in range(7) :
+            for y in range(7) :
+                for i in self.board[x][y].open :
+                    if x != 0 :
+                        if i =='n' and  not self.board[x-1][y] in self.board[x][y].voisins :
+                            for j in self.board[x-1][y].open :
+                                if j == "s":
+                                    self.board[x][y].voisins.append(self.board[x-1][y])
+                    if x != 6:
+                        if i =='s' and  not self.board[x+1][y] in self.board[x][y].voisins :
+                            for j in self.board[x+1][y].open :
+                                if j == "n":
+                                    self.board[x][y].voisins.append(self.board[x+1][y])
+                    if y != 6 :
+                        if i =='e' and  not self.board[x+1][y] in self.board[x][y].voisins :
+                            for j in self.board[x+1][y].open :
+                                if j == "o":
+                                    self.board[x][y].voisins.append(self.board[x][y+1])
+                    if y != 0 :
+                        if i =='o' and  not self.board[x-1][y] in self.board[x][y].voisins :
+                            for j in self.board[x-1][y].open :
+                                if j == "e":
+                                    self.board[x][y].voisins.append(self.board[x][y-1])
+                
 class Tile :
     def __init__(self, fix, ID, road, objet = None, color = 0) :
         """
@@ -107,6 +182,7 @@ class Tile :
         self._id = ID
         self.road = road
         self.orientation = 0       # orientation | 0 = 0° | 1 = 90° | 2 = 180° | 3 = 270° |
+        self.voisins = []
         self.open = []
         self.find_open()
 
@@ -147,45 +223,54 @@ class Tile :
         self.orientation = orientation
 
     def find_open(self) :
+        """
+        Cette méthode permet de savoir sur une tuile(case) où sont les ouverture.
+        pour par la suite pouvoir faire la recherche de chemin
+
+        Returns
+        -------
+        None.
+
+        """
         if self.road =='line' :
             if self.orientation in (0, 2) :
-                self.open.append('north')
-                self.open.append('south')
+                self.open.append('n')
+                self.open.append('s')
             elif self.orientation in (1, 3) :
-                self.open.append('north')
-                self.open.append('south')
+                self.open.append('n')
+                self.open.append('s')
 
         if self.road == 'angle' :
             if self.orientation == 0 :
-                self.open.append('south')
-                self.open.append('est')
+                self.open.append('s')
+                self.open.append('e')
             elif self.orientation == 1 :
-                self.open.append('south')
-                self.open.append('ouest')
+                self.open.append('s')
+                self.open.append('o')
             elif self.orientation == 2 :
-                self.open.append('north')
-                self.open.append('ouest')
+                self.open.append('n')
+                self.open.append('o')
             elif self.orientation == 3 :
-                self.open.append('north')
-                self.open.append('est')
+                self.open.append('n')
+                self.open.append('e')
 
         if self.road == 'triple' :
             if self.orientation == 0 :
-                self.open.append('north')
-                self.open.append('est')
-                self.open.append('south')
+                self.open.append('n')
+                self.open.append('e')
+                self.open.append('s')
             elif self.orientation == 1 :
-                self.open.append('ouest')
-                self.open.append('est')
-                self.open.append('south')
+                self.open.append('o')
+                self.open.append('e')
+                self.open.append('s')
             elif self.orientation == 2 :
-                self.open.append('north')
-                self.open.append('ouest')
-                self.open.append('south')
+                self.open.append('n')
+                self.open.append('o')
+                self.open.append('s')
             elif self.orientation == 3 :
-                self.open.append('north')
-                self.open.append('ouest')
-                self.open.append('est')
+                self.open.append('n')
+                self.open.append('o')
+                self.open.append('e')
 
 
 
@@ -229,8 +314,7 @@ class Pile :
         self.pile.pop(len(self.pile))
 
     def len_(self) :
-        return len(self.pile)
-
+        return len(self.pile)   
 
 
 game = Plato(4)
