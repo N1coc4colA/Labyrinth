@@ -2,6 +2,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
+import time
+
 from gui.tile import Tile, InputTile
 def ensureRaised(w):
 	"""
@@ -9,13 +11,8 @@ def ensureRaised(w):
 
 	Parameters
 	----------
-	w : QWidget
+	w: QWidget
 		Widget meant to be raised.
-
-	Returns
-	-------
-	None.
-
 	"""
 	#Ensures this draggable is the one at the top-front, so it is no hidden when dragged. Max tiles is 9, plus the congrats popup, so do it 9-1 times.
 	for i in range(65):
@@ -27,14 +24,14 @@ def widgetAt(p, pos):
 
 	Parameters
 	----------
-	p : QWidget
+	p: QWidget
 		A widget to escape.
-	pos : QPoint
+	pos: QPoint
 		Target point.
 
 	Returns
 	-------
-	w : TYPE
+	w: TYPE
 		DESCRIPTION.
 
 	"""
@@ -43,10 +40,16 @@ def widgetAt(p, pos):
 			return w
 	return None
 
+def smartRaiseUp(p, pos):
+	pass
+
 class TestData:
 	def __init__(self, o = 0):
 		self.orientation = o
 		self.pixmap = QPixmap()
+
+	def getId(self):
+		return 0
 
 class Board(QWidget):
 	def __init__(self, parent = None):
@@ -57,20 +60,26 @@ class Board(QWidget):
 		self.backend = None
 		self.running_animations = []
 		self.currentlyUsed = None
+		self._timer = QTimer()
+		self._timer.setInterval(700)
+		self._timer.setSingleShot(True)
+		self._timer.timeout.connect(self.unlock)
+
+	def unlock(self):
+		self.setEnabled(True)
+
+	def lockForAnims(self):
+		self._timer.stop()
+		self._timer.start()
 
 	def setBackend(self, bkd):
 		self.backend = bkd
 		self.setTilesData(bkd.board)
+		self.currentlyUsed.setInternalData(bkd.current)
 
 	def load(self):
 		"""
 		Sets up all the tiles that goes with the board.
-
-			i
-		Returns
-		-------
-		None.
-
 		"""
 		#Fill with the main tiles
 		for x in range(7):
@@ -116,13 +125,8 @@ class Board(QWidget):
 
 		Parameters
 		----------
-		event : QResizeEvent
+		event: QResizeEvent
 			The input event.
-
-		Returns
-		-------
-		None.
-
 		"""
 		w = (event.size().width() - 630)/2
 		h = (event.size().height() - 630)/2
@@ -152,23 +156,45 @@ class Board(QWidget):
 
 		Parameters
 		----------
-		p : gui.tile.Tile
+		p: gui.tile.Tile
 			A tile to escape.
-		pos : QPoint
+		pos: QPoint
 			The target point.
 
 		Returns
 		-------
-		w : gui.tile.Tile or None
+		w: gui.tile.Tile or None
 			The tile found
 
 		"""
-
-		for w in self.children():
-			if not isinstance(w, InputTile) and isinstance(w, Tile):
+		t = self.currentlyUsed
+		if t != None and (t.x() <= pos.x() and t.x()+t.width() >= pos.x()) and (t.y() <= pos.y() and t.y()+t.height() >= pos.y()) and t != p:
+			return w
+		for l in self.tiles:
+			for w in l:
 				if (w.x() <= pos.x() and w.x()+w.width() >= pos.x()) and (w.y() <= pos.y() and w.y()+w.height() >= pos.y()) and w != p:
 					return w
 		return None
+
+	def removeGlowing(self):
+		"""
+		Stops the glowing effect of all the tiles.
+
+		"""
+		l = self.children()
+		for w in l:
+			if isinstance(w, Tile):
+				w.setGlowing(False)
+
+	def swapTile(self, begin):
+		#[TODO] Fix that list mess
+		for x in range(7):
+			for y in range(7):
+				if self.tiles[x][y] == begin:
+					print("Found the result at", x, y, "val:", self.tiles[x][y])
+					self.tiles[x][y] = self.currentlyUsed
+		self.currentlyUsed = begin
+		print("val:", self.currentlyUsed)
 
 	def tileInsertion(self, source, target):
 		#Tell the backend that we're moving
@@ -188,43 +214,58 @@ class Board(QWidget):
 			horizontal = True
 		if not horizontal and p.y() == h:
 			beg = True
+
 		#Generate animations and lock UI.
 		self.setEnabled(False)
 		target.setMovable(False)
 
+		#Stack the moved tiles under the movable one.
 		if horizontal:
+			target.setGlowing(True)
 			c = QPropertyAnimation(target, b"pos")
+			c.setStartValue(target.pos())
 			if (beg):
 				c.setEndValue(QPoint(p.x()+70, p.y()+1))
 			else:
 				c.setEndValue(QPoint(p.x()-70, p.y())+1)
-			c.setDuration(100)
+			c.setDuration(700)
 			c.setEasingCurve(QEasingCurve.InOutCubic)
 
 			i = 1
 			while i < 8:
-				t_x = w+i*70
-				a = QPropertyAnimation(self.tileAt(QPoint(t_x, p.y()+1)), b"pos")
-				a.setEndValue(QPoint(t_x, p.y()+1))
-				a.setDuration(100)
+				t_x = w+i*70+70
+				end_pos = QPoint(t_x, p.y()+1)
+				start_pos = QPoint(t_x, p.y()+1)
+				tile = self.tileAt(start_pos)
+
+				a = QPropertyAnimation(tile, b"pos")
+				a.setEndValue(end_pos)
+				a.setDuration(700)
 				a.setEasingCurve(QEasingCurve.InOutCubic)
 				self.running_animations.append(a)
-				i = i + (1 if beg else -1)
 
-			result = self.tileAt(QPoint(w+i*70, p.y()+1))
+				i += (1 if beg else -1)
+
+			objective = QPoint(w+i*70, p.y()+1)
+			result = self.tileAt(objective)
 			result.setMovable(True)
 			ensureRaised(result)
 
 			b = QPropertyAnimation(result, b"pos")
+			b.setStartValue(QPoint(objective.x() + (-70 if beg else 0), objective.y()))
 			b.setEndValue(fin)
-			b.setDuration(100)
+			b.setDuration(700)
 			b.setEasingCurve(QEasingCurve.InOutCubic)
 			self.running_animations.append(b)
 			self.running_animations.append(c)
 
+			#Exchange the current tile with the end one.
+			self.swapTile(result)
+
 			for anim in self.running_animations:
 				anim.start()
 
+			#Push update to BKD
 		else:
 			for i in range(0,6):
 				a = QPropertyAnimation(widgetAt(self, QPoint(p.x(), w+i*70)), b"pos")
@@ -233,4 +274,5 @@ class Board(QWidget):
 				a.setEasingCurve(QEasingCurve.InOutCubic)
 				self.running_animations.append(a)
 				a.start()
-		self.setEnabled(True)
+		self.removeGlowing()
+		self.lockForAnims()

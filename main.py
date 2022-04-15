@@ -5,9 +5,9 @@ import sys
 app = QApplication(sys.argv)
 
 from gui.gameboard import Board
-from data.laby_info import Plato
+from data.laby_info import BoardBackend
 
-bkd = Plato(2)
+bkd = BoardBackend(2)
 b = Board()
 b.load()
 b.show()

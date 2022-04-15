@@ -9,13 +9,8 @@ def ensureRaised(w):
 
 	Parameters
 	----------
-	w : QWidget
+	w: QWidget
 		Widget meant to be raised.
-
-	Returns
-	-------
-	None.
-
 	"""
 	#Ensures this draggable is the one at the top-front, so it is no hidden when dragged. Max tiles is 9, plus the congrats popup, so do it 9-1 times.
 	for i in range(9):
@@ -27,15 +22,15 @@ def widgetAt(p, pos):
 
 	Parameters
 	----------
-	p : QWidget
+	p: QWidget
 		A widget to escape.
-	pos : QPoint
+	pos: QPoint
 		Target point.
 
 	Returns
 	-------
-	w : TYPE
-		DESCRIPTION.
+	w: QWidget
+		The widget found or None
 
 	"""
 	for w in p.parentWidget().children():
@@ -44,6 +39,9 @@ def widgetAt(p, pos):
 	return None
 
 class Tile(QLabel):
+	"""
+	UI widget used as a tile.
+	"""
 	def __init__(self, d, parent = None):
 		super(Tile, self).__init__(parent)
 		self.setFixedSize(70, 70)
@@ -51,7 +49,6 @@ class Tile(QLabel):
 		self.setLineWidth(1)
 		self.setMidLineWidth(3)
 		self.setMouseTracking(True)
-		self.setInternalData(d)
 
 		self.movable = False
 		self.press = False
@@ -60,6 +57,11 @@ class Tile(QLabel):
 		self._id = -1
 		self._data = None
 		self.o_target = None
+		self._glowing = False
+
+		self.setInternalData(d)
+
+		self._acceptsMoves = True
 
 	def tileEvent(self, is_in):
 		"""
@@ -67,17 +69,20 @@ class Tile(QLabel):
 
 		Parameters
 		----------
-		is_in : bool
-			DESCRIPTION.
-
-		Returns
-		-------
-		None.
-
+		is_in: bool
+			Wether it is entering (True) or leaving (False) the tile.
 		"""
 		pass
 
 	def tileRelease(self, tile):
+		"""
+		Not implemented. Reimplement it to know when a tile is dropped on the tile.
+
+		Parameters
+		----------
+		tile: Tile
+			The other tile dropped on this one.
+		"""
 		pass
 
 	def setInternalData(self, d):
@@ -86,7 +91,7 @@ class Tile(QLabel):
 
 		Parameters
 		----------
-		d : Unknown.
+		d: Unknown.
 			The data holder.
 
 		"""
@@ -97,23 +102,30 @@ class Tile(QLabel):
 			self.pixmap = d.pixmap
 		self.update()
 
+	def internalData(self):
+		"""
+		Get the internal data of the tile.
+		"""
+		return self._data
+
 	def setMovable(self, mv):
 		"""
 		Change the ability of the tile to be moved.
 
 		Parameters
 		----------
-		mv : bool
+		mv: bool
 			Enable the hold tile behaviour on True
-
-		Returns
-		-------
-		None.
-
 		"""
+		if not self._acceptsMoves:
+			return
 		self.movable = mv
 		self.press = False
 		self.move(self.source.x(), self.source.y())
+
+	def setGlowing(self, enable):
+		self._glowing = enable
+		self.repaint()
 
 	def mouseMoveEvent(self, event):
 		"""
@@ -121,15 +133,10 @@ class Tile(QLabel):
 
 		Parameters
 		----------
-		event : QMouseMoveEvent
+		event: QMouseMoveEvent
 			The input event.
-
-		Returns
-		-------
-		None.
-
 		"""
-		if self.press and self.movable:
+		if self.press and self.movable and self.isEnabled():
 			#Track to move
 			upd = self.mapToParent(event.pos())
 			final = QPoint(upd.x() - self.diff[0], upd.y() - self.diff[1])
@@ -150,13 +157,8 @@ class Tile(QLabel):
 
 		Parameters
 		----------
-		event : QMoveEvent
+		event: QMoveEvent
 			The input event.
-
-		Returns
-		-------
-		None.
-
 		"""
 		if not self.press:
 			#Update when the move is a 'normal' one, used while changing game board with anims mainly.
@@ -174,13 +176,8 @@ class Tile(QLabel):
 
 		Parameters
 		----------
-		event : QMouseEvent
+		event: QMouseEvent
 			The input event.
-
-		Returns
-		-------
-		None.
-
 		"""
 		if self.isEnabled() and self.movable:
 			ensureRaised(self) #Shows the widget at top
@@ -196,15 +193,11 @@ class Tile(QLabel):
 
 		Parameters
 		----------
-		event : QmouseReleaseEvent
+		event: QMouseReleaseEvent
 			The input event.
-
-		Returns
-		-------
-		None.
-
 		"""
 		if self.press and self.movable:
+			self.move(self.mapToParent(QPoint(event.pos().x() - self.diff[0], event.pos().y() - self.diff[1])))
 			self.press = False
 			upd = self.mapToParent(event.pos())
 			#If there's a tile under, make it handle the release tile.
@@ -212,6 +205,34 @@ class Tile(QLabel):
 			if w and isinstance(w, InputTile):
 				w.tileRelease(self)
 			return super(Tile, self).mouseReleaseEvent(event)
+
+	def paintEvent(self, event):
+		"""
+		Handles painting of the widget.
+
+		Parameters
+		----------
+		event: QPaintEvent
+			The input event.
+		"""
+		p = QPainter(self)
+		clipper = QPainterPath()
+		clipper.addRoundedRect(QRectF(3, 3, self.width() - 3, self.height() - 3), 5, 5)
+		p.setRenderHint(QPainter.Antialiasing)
+		p.setClipPath(clipper)
+
+		#Draw the pixmap
+		if self._data.pixmap.isNull():
+			p.fillRect(event.rect(), QBrush(QColor(100, 200, 200, 250)))
+		else:
+			p.drawPixmap(event.rect(), self._data.pixmap.scaled(self.width(), self.height()), event.rect())
+		#The glowing effect if needed
+		if self._glowing:
+			p.fillRect(event.rect(), QBrush(QColor(0, 150, 200, 100)))
+
+		#Paint the border
+		p.setPen(QPen(Qt.yellow, 3))
+		p.drawPath(clipper)
 
 #Generate the list of poligons used for the input tiles.
 arrows = {}
@@ -234,7 +255,7 @@ def get_arrows():
 
 	Returns
 	-------
-	arrows : list
+	arrows: list
 		List of QPolygon.
 
 	"""
@@ -242,6 +263,9 @@ def get_arrows():
 	return arrows
 
 class InputTile(Tile):
+	"""
+	Tile used to drop another one on it.
+	"""
 	def __init__(self, d, parent = None):
 		super(InputTile, self).__init__(d, parent)
 		self.tile_hovered = False
@@ -255,13 +279,8 @@ class InputTile(Tile):
 
 		Parameters
 		----------
-		is_in : bool
+		is_in: bool
 			True if the tile enters, False if going out.
-
-		Returns
-		-------
-		None.
-
 		"""
 		if is_in and not self.tile_hovered:
 			self.tile_hovered = True
@@ -271,7 +290,10 @@ class InputTile(Tile):
 			self.repaint()
 
 	def tileRelease(self, tile):
+		#Clear colors
 		self.parentWidget().tileInsertion(self, tile)
+		self.tile_hovered = False
+		self.repaint()
 
 	def paintEvent(self, ev):
 		"""
@@ -279,18 +301,21 @@ class InputTile(Tile):
 
 		Parameters
 		----------
-		ev : QPaintEvent
+		ev: QPaintEvent
 			The input event.
-
-		Returns
-		-------
-		None.
-
 		"""
+		clipper = QPainterPath()
+		clipper.addRoundedRect(QRectF(3, 3, self.width() - 3, self.height() - 3), 5, 5)
+
 		painter = QPainter()
 		painter.begin(self)
+		painter.setRenderHint(QPainter.Antialiasing)
+		painter.setClipPath(clipper)
+		
 		if self.tile_hovered:
 			painter.fillRect(self.rect(), QBrush(Qt.green))
+		else:
+			painter.fillRect(self.rect(), QBrush(Qt.gray))
 		painter.fillPath(self._path, QBrush(Qt.yellow))
 		painter.end()
-		return super(InputTile, self).paintEvent(ev)
+		#return super(InputTile, self).paintEvent(ev)
