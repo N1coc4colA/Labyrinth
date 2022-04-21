@@ -228,10 +228,10 @@ class Tile(QLabel):
 			p.drawPixmap(event.rect(), self._data.pixmap.scaled(self.width(), self.height()), event.rect())
 		#The glowing effect if needed
 		if self._glowing:
-			p.fillRect(event.rect(), QBrush(QColor(0, 150, 200, 100)))
+			p.fillRect(event.rect(), QBrush(QColor(200, 0, 0, 100)))
 
 		#Paint the border
-		p.setPen(QPen(Qt.yellow, 3))
+		p.setPen(QPen(Qt.gray, 3))
 		p.drawPath(clipper)
 
 #Generate the list of poligons used for the input tiles.

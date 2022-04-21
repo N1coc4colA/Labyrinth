@@ -59,20 +59,20 @@ class BoardBackend:
 		elif nb_players == 2:
 			self.j1 = Persona(1, self.card.liste[:12])
 			self.j2 = Persona(3, self.card.liste[12:])
-			self.player.extend(self.j1, self.j2)
+			self.player.extend({self.j1, self.j2})
 
 		elif nb_players == 3:
 			self.j1 = Persona(1, self.card.liste[:5])
 			self.j2 = Persona(2, self.card.liste[6:12])
 			self.j3 = Persona(3, self.card.liste[12:18])
-			self.player.extend(self.j1, self.j2, self.j3)
+			self.player.extend({self.j1, self.j2, self.j3})
 
 		elif nb_players == 4:
 			self.j1 = Persona(1, self.card.liste[:6])
 			self.j2 = Persona(2, self.card.liste[6:12])
 			self.j3 = Persona(3, self.card.liste[12:18])
 			self.j4 = Persona(4, self.card.liste[18:])
-			self.player.extend(self.j1, self.j2, self.j3, self.j4)
+			self.player.extend({self.j1, self.j2, self.j3, self.j4})
 
 	def move(self, rank, start):
 		"""
