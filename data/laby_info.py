@@ -2,7 +2,7 @@
 from random import randint
 from PyQt5.QtGui import QPixmap
 
-def isPlayable(self, rank):
+def isPlayable(rank):
 	"""
 	Know if the given rank on the labyrinth should be playable.
 
@@ -85,7 +85,7 @@ class BoardBackend:
 		start: str
 			The direction to move the tiles.
 		"""
-		if self.playable(rank) == True:
+		if isPlayable(rank) == True:
 			if start == 'down':
 				for i in range(6):
 					self.board[i][rank], self.board[i+1][rank] = self.board[i+1][rank], self.board[i][rank]
@@ -95,7 +95,7 @@ class BoardBackend:
 						i.setlocation(rank, 0)
 			elif start == 'up':
 				for i in range(0, 6, -1):
-					self.board[i][rank], self.board[i+1][rank] = self.board[i+1][rank], self.board[i][rank]
+					self.board[i][rank], self.boaself, rd[i+1][rank] = self.board[i+1][rank], self.board[i][rank]
 				self.board[0][rank], self.out_tile = self.out_tile, self.board[0][rank]
 				for i in self.player:
 					if i.location == (rank, 0):
@@ -140,6 +140,20 @@ class BoardBackend:
 								if j == "e":
 									self.board[x][y].nearbies.append(self.board[x][y-1])
 
+	def __str__(self):
+		out = ""
+		t = " ____________________________________\n"
+		out += t
+		for l in self.board:
+			out += " |"
+			for e in l:
+				v = str(e.getId())
+				if len(v)  < 2:
+					v = " " + v
+				out += " " + v + " |"
+			out += "\n"
+		out += t
+		return out
 
 class Tile:
 	"""
