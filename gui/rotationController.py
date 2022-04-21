@@ -130,7 +130,8 @@ class RotationController(QWidget):
 		p.drawPixmap(QRect(5 + (self._itemSize[0] - self._lowest)/2, 5 + (self._itemSize[1] - self._lowest)/2, self._lowest, self._lowest), self._pixmaps[0])
 
 	def paintEvent(self, e):
-		p = QPainter(self)
+		p = QPainter()
+		p.begin(self)
 		clipper = QPainterPath()
 		clipper.addRoundedRect(QRectF(0, 0, self.width(), self.height()), 8, 8)
 		p.setClipPath(clipper)
@@ -146,7 +147,7 @@ class RotationController(QWidget):
 			path.addRoundedRect(QRectF(5, 5, self._itemSize[0] *2, self._itemSize[1]), 5, 5)
 			p.setClipPath(path)
 			if self._clicks:
-				p.fillRect(QRectF(5 + (self._itemSize[0] if (self._side == 2) else 0), 5, self._itemSize[0], self._itemSize[1]), QBrush(self.palette().color(QPalette.ColorGroup.Current, QPalette.ColorRole.Highlight)))
+				p.fillRect(QRectF(5 + (self._itemSize[0] if (self._side == 2) else 0), 5, self._itemSize[0], self._itemSize[1]), QBrush(self.palette().color(self.palette().currentColorGroup(), QPalette.Highlight)))
 			elif self._hovers:
 				p.fillRect(QRectF(5 + (self._itemSize[0] if (self._side == 2) else 0), 5, self._itemSize[0], self._itemSize[1]), QBrush(QColor(220, 220, 220)))
 		#Draw arrows if needed.
@@ -158,3 +159,4 @@ class RotationController(QWidget):
 		elif side == 3:
 			self.paintPixmapLeft(e, p)
 			self.paintPixmapRight(e, p)
+		p.end()

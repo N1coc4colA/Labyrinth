@@ -238,6 +238,7 @@ class Board(QWidget):
 
 		w = (self.width() - 630)/2
 		h = (self.height() - 630)/2
+
 		#Check direction
 		p = source.pos()
 		horizontal = False
@@ -250,6 +251,13 @@ class Board(QWidget):
 			horizontal = True
 		elif not horizontal and h <= p.y() and p.y() <= h+70:
 			beg = True
+
+		#Generate target index for BKD.
+		transformed = 0
+		if horizontal:
+			transformed = (p.y() - h)//70
+		else:
+			transformed = (p.x() - w)//70
 
 		#Generate animations and lock UI.
 		self.setEnabled(False)
@@ -300,6 +308,8 @@ class Board(QWidget):
 			self.running_animations.append(c)
 			for anim in self.running_animations:
 				anim.start()
+
+			self.backend.move(transformed, ("down" if horizontal else "right"))
 		else:
 			#First of all update all the table.
 			v = (self.columnOf(self.tileAt(QPoint(w+140, p.y()+1))) if horizontal else self.rowOf(self.tileAt(QPoint(p.x()+1, h+140))))#We can use a random tile, no need to make it more complex.
@@ -345,6 +355,11 @@ class Board(QWidget):
 			self.running_animations.append(c)
 			for anim in self.running_animations:
 				anim.start()
+
+			self.backend.move(transformed, ("up" if horizontal else "left"))
+
+		#Chec that it does work.
+		print(self.backend)
 
 		#Push update to BKD
 		self.lockForAnims()
