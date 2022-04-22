@@ -30,7 +30,6 @@ class BoardBackend:
 		self.all_tile = []
 
 		self.board = [[Tile(True, i+j*7, 'line') for i in range(self.width)] for j in range(self.height)]
-		self.out_tile = self.board[6][6]  #road et objet vont changer
 		self.current = Tile(True, 49, 'line') #The actual tile
 
 		for i in range(self.width):
@@ -49,7 +48,6 @@ class BoardBackend:
 		for x in range(7):
 			for y in range(7):
 				self.all_tile.append(self.board[x][y])
-		self.all_tile.append(self.out_tile)
 
 		self.card.random()
 		self.player = []
@@ -85,35 +83,39 @@ class BoardBackend:
 		start: str
 			The direction to move the tiles.
 		"""
+		cpy = self.current
 		if isPlayable(rank) == True:
-			if start == 'down':
+			if start == 'up':
+				#begin, end = self.board[0][rank], self.board[6][rank]
 				for i in range(6):
 					self.board[i][rank], self.board[i+1][rank] = self.board[i+1][rank], self.board[i][rank]
-				self.board[7][rank], self.out_tile = self.out_tile, self.board[7][rank]
+				self.board[6][rank], self.current = self.current, self.board[6][rank]
 				for i in self.player:
 					if i.location == (rank, 7):
 						i.setlocation(rank, 0)
-			elif start == 'up':
+			elif start == 'down':
 				for i in range(0, 6, -1):
-					self.board[i][rank], self.boaself, rd[i+1][rank] = self.board[i+1][rank], self.board[i][rank]
-				self.board[0][rank], self.out_tile = self.out_tile, self.board[0][rank]
+					self.board[i][rank], self.board[i+1][rank] = self.board[i+1][rank], self.board[i][rank]
+				self.board[0][rank], self.current = self.current, self.board[0][rank]
 				for i in self.player:
 					if i.location == (rank, 0):
 						i.setlocation(rank, 7)
 			elif start == 'left':
 				for i in range(6):
 					self.board[rank][i], self.board[rank][i+1] = self.board[rank][i+1], self.board[rank][i]
-				self.board[rank][6], self.out_tile = self.out_tile, self.board[rank][6]
+				self.board[rank][6], self.current = self.current, self.board[rank][6]
 				for i in self.player:
 					if i.location == (7, rank):
 						i.setlocation(0, rank)
 			elif start == 'right':
 				for i in range(6, 0, -1):
 					self.board[rank][i], self.board[rank][i-1] = self.board[rank][i-1], self.board[rank][i]
-				self.board[rank][0], self.out_tile = self.out_tile, self.board[rank][0]
+				self.board[rank][0], self.current = self.current, self.board[rank][0]
 				for i in self.player:
 					if i.location == (0, rank):
 						i.setlocation(7, rank)
+		else:
+			print("Invalid pos:", rank)
 
 	def graph(self):
 		for x in range(7):
@@ -141,9 +143,7 @@ class BoardBackend:
 									self.board[x][y].nearbies.append(self.board[x][y-1])
 
 	def __str__(self):
-		out = ""
-		t = " ____________________________________\n"
-		out += t
+		out = " ____________________________________\n"
 		for l in self.board:
 			out += " |"
 			for e in l:
@@ -152,7 +152,11 @@ class BoardBackend:
 					v = " " + v
 				out += " " + v + " |"
 			out += "\n"
-		out += t
+		out += " ------------------------------------\n |"
+		v = str(self.current.getId())
+		if len(v)  < 2:
+			v = " " + v
+		out += " |\n ------\n"
 		return out
 
 class Tile:
