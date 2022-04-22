@@ -83,6 +83,7 @@ class Board(QWidget):
 		self.backend = bkd
 		self.setTilesData(bkd.board)
 		self.currentlyUsed.setInternalData(bkd.current)
+		print("Backend's current:", bkd.current.getId())
 
 	def forceUpdate(self):
 		for l in self.tiles:
@@ -281,6 +282,8 @@ class Board(QWidget):
 			c.setDuration(700)
 			c.setEasingCurve(QEasingCurve.InOutCubic)
 
+			#Be careful when submitting to BKD, compared to BKD, x, y = y, x !
+
 			i = 1
 			while i < 8:
 				pos = QPoint((w+i*70+70 if horizontal else p.x()+1), (p.y()+1 if horizontal else h+i*70+70))
@@ -309,7 +312,7 @@ class Board(QWidget):
 			for anim in self.running_animations:
 				anim.start()
 
-			self.backend.move(transformed, ("down" if horizontal else "right"))
+			self.backend.move(int(transformed-1), ("right" if horizontal else "down"))
 		else:
 			#First of all update all the table.
 			v = (self.columnOf(self.tileAt(QPoint(w+140, p.y()+1))) if horizontal else self.rowOf(self.tileAt(QPoint(p.x()+1, h+140))))#We can use a random tile, no need to make it more complex.
@@ -356,7 +359,7 @@ class Board(QWidget):
 			for anim in self.running_animations:
 				anim.start()
 
-			self.backend.move(transformed, ("up" if horizontal else "left"))
+			self.backend.move(int(transformed), ("left" if horizontal else "up"))
 
 		#Chec that it does work.
 		print(self.backend)
