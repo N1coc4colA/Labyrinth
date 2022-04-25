@@ -94,8 +94,8 @@ class BoardBackend:
 					if i.location == (rank, 7):
 						i.setlocation(rank, 0)
 			elif start == 'down':
-				for i in range(0, 6, -1):
-					self.board[i][rank], self.board[i+1][rank] = self.board[i+1][rank], self.board[i][rank]
+				for i in range(6, 0, -1):
+					self.board[i][rank], self.board[i-1][rank] = self.board[i-1][rank], self.board[i][rank]
 				self.board[0][rank], self.current = self.current, self.board[0][rank]
 				for i in self.player:
 					if i.location == (rank, 0):
@@ -141,6 +141,30 @@ class BoardBackend:
 							for j in self.board[x-1][y].openings:
 								if j == "e":
 									self.board[x][y].nearbies.append(self.board[x][y-1])
+
+
+    def find_road(self, start, end, visite, road):
+        """
+        il faut une fonction qui -trouve les cooedonné de l'objet sur le tableau
+                                 -compare la taille des chemin est trouve le meilleur
+        Parameters
+        ----------
+        start : TUPLE
+            DESCRIPTION.
+        end : TYPE
+            DESCRIPTION.
+        visite : LIST
+            liste des élèment déja visiter.
+        road : LIST
+            liste qui contien le chemi pour aller au but.
+
+        Returns
+        -------
+        None.
+
+        """
+        pass
+        
 
 	def __str__(self):
 		out = " ____________________________________\n"
@@ -412,3 +436,5 @@ class Pile:
 
 	def __len__(self):
 		return len(self.pile)
+
+g = BoardBackend(4)
