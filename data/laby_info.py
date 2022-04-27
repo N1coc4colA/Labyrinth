@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from random import randint
+from random import *
 from PyQt5.QtGui import QPixmap
 
 def isPlayable(rank):
@@ -117,6 +117,7 @@ class BoardBackend:
 		else:
 			print("Invalid pos:", rank)
 
+
 	def graph(self):
 		for x in range(7):
 			for y in range(7):
@@ -142,29 +143,47 @@ class BoardBackend:
 								if j == "e":
 									self.board[x][y].nearbies.append(self.board[x][y-1])
 
+	def find_road(self, start, end, visite, road):
+		"""
+		il faut une fonction qui -trouve les cooedonné de l'objet sur le tableau
+								 -compare la taille des chemin est trouve le meilleur
+		Parameters
+		----------
+		start : TUPLE
+			DESCRIPTION.
+		end : TYPE
+			DESCRIPTION.
+		visite : LIST
+			liste des élèment déja visiter.
+		road : LIST
+			liste qui contien le chemi pour aller au but.
 
-    def find_road(self, start, end, visite, road):
-        """
-        il faut une fonction qui -trouve les cooedonné de l'objet sur le tableau
-                                 -compare la taille des chemin est trouve le meilleur
-        Parameters
-        ----------
-        start : TUPLE
-            DESCRIPTION.
-        end : TYPE
-            DESCRIPTION.
-        visite : LIST
-            liste des élèment déja visiter.
-        road : LIST
-            liste qui contien le chemi pour aller au but.
+		Returns
+		-------
+		None.
 
-        Returns
-        -------
-        None.
+		"""
+		pass
+		
+    
+	def random(self) :
+		extern = []
+		for i in range(0, 7) :
+			for j in range(0, 7) :
+				if i%2==1 or j%2==1 :
+					extern.append(self.board[i][j])
+					self.board[i][j] = 0
+		extern = randomise(extern)
+		for i in extern :
+			a = randint(0, 4)
+			i.setOrientation(a)
+		for i in range(0, 7) :
+			for j in range(0, 7) :
+				if self.board[i][j] == 0 :
+					self.board[i][j] = extern.pop()
 
-        """
-        pass
-        
+
+
 
 	def __str__(self):
 		out = " ____________________________________\n"
@@ -206,7 +225,7 @@ class Tile:
 		color: int, optional
 			Has to be one of the followings: 0: no spawn (default), 1: white spawn, 2: turquoise spawn, 3: black spawn, 4: violet spawn
 		"""
-		self.pixmap = QPixmap("./images/tile_" + str(ID) + ".png")
+		#self.pixmap = QPixmap("./images/tile_" + str(ID) + ".png")
 		self.item = objet
 		self.static = fixed
 		self.spawn = color
@@ -436,5 +455,16 @@ class Pile:
 
 	def __len__(self):
 		return len(self.pile)
+    
+def randomise(l) :
+    out = []
+    g = len(l)
+    for i in range(g) :
+        a = randint(0, len(l))
+        out.append(l.pop(a-1))
+    return out
+    
 
 g = BoardBackend(4)
+g.random()
+g.graph()
