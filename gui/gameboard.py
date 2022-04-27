@@ -167,6 +167,9 @@ class Board(QWidget):
 		self.layoutTable(event.size())
 		#Move the controller
 		self.controller.move(event.size().width() - 5 - self.controller.width(), event.size().height() - 5 - self.controller.height())
+		#Move the current tile if needed.
+		if self.currentlyUsed and self.currentlyUsed.hasMoved():
+			self.currentlyUsed.move(20, 20)
 
 		super(Board, self).resizeEvent(event)
 
@@ -269,6 +272,7 @@ class Board(QWidget):
 			v = (self.columnOf(self.tileAt(QPoint(w+140, p.y()+1))) if horizontal else self.rowOf(self.tileAt(QPoint(p.x()+1, h+140)))) #We can use a random tile, no need to make it more complex.
 			edge = self.tiles[(6 if horizontal else v)][(v if horizontal else 6)]
 
+			#Update internal state
 			i = 6
 			while i > -1:
 				self.tiles[(i if horizontal else v)][(v if horizontal else i)] = (self.currentlyUsed if (i == 0) else self.tiles[(i-1 if horizontal else v)][(v if horizontal else i-1)])
@@ -283,7 +287,6 @@ class Board(QWidget):
 			c.setEasingCurve(QEasingCurve.InOutCubic)
 
 			#Be careful when submitting to BKD, compared to BKD, x, y = y, x !
-
 			i = 1
 			while i < 8:
 				pos = QPoint((w+i*70+70 if horizontal else p.x()+1), (p.y()+1 if horizontal else h+i*70+70))
@@ -298,13 +301,14 @@ class Board(QWidget):
 			result = self.tileAt(objective)
 
 			b = QPropertyAnimation(result, b"pos")
-			b.setStartValue(QPoint((objective.x()-70 if horizontal else objective.x()), (objective.y() if horizontal else objective.y()-70)))
-			b.setEndValue(fin)
+			b.setStartValue(target.pos())
+			b.setEndValue(QPoint(20, 20))
 			b.setDuration(700)
 			b.setEasingCurve(QEasingCurve.InOutCubic)
 
 			#Make sure the new tile can be moved by the user.
 			result.setMovable(True)
+			result.reset()
 
 			#Run the animations
 			self.running_animations.append(b)
@@ -346,12 +350,13 @@ class Board(QWidget):
 
 			b = QPropertyAnimation(result, b"pos")
 			b.setStartValue(QPoint((objective.x()+70 if horizontal else objective.x()), (objective.y() if horizontal else objective.y()+70)))
-			b.setEndValue(target.pos())
+			b.setEndValue(QPoint(20, 20))
 			b.setDuration(700)
 			b.setEasingCurve(QEasingCurve.InOutCubic)
 
 			#Make sure the new tile can be moved by the user.
 			result.setMovable(True)
+			result.reset()
 
 			#Run the animations
 			#self.running_animations.append(b)
@@ -359,7 +364,7 @@ class Board(QWidget):
 			for anim in self.running_animations:
 				anim.start()
 
-			self.backend.move(int(transformed), ("left" if horizontal else "up"))
+			self.backend.move(int(transformed)-1, ("left" if horizontal else "up"))
 
 		#Chec that it does work.
 		print(self.backend)

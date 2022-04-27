@@ -42,6 +42,9 @@ class Tile(QLabel):
 	"""
 	UI widget used as a tile.
 	"""
+
+	colors = [QColor("#fff"), QColor("#00fdc1"), QColor("#000"), QColor("#7f84ff")]
+
 	def __init__(self, d, parent = None):
 		super(Tile, self).__init__(parent)
 		self.setFixedSize(70, 70)
@@ -58,10 +61,17 @@ class Tile(QLabel):
 		self._data = None
 		self.o_target = None
 		self._glowing = False
+		self._has_moved = False
 
 		self.setInternalData(d)
 
 		self._acceptsMoves = True
+
+	def hasMoved(self):
+		return not self._has_moved
+
+	def reset(self):
+		self._has_moved = False
 
 	def tileEvent(self, is_in):
 		"""
@@ -145,10 +155,13 @@ class Tile(QLabel):
 			if self.o_target:
 				self.o_target.tileEvent(False)
 			#Dispatch the notification to tell that the tile behind have been entered.
-			self.o_target = widgetAt(self, upd)
-			if self.o_target != None and isinstance(self.o_target, InputTile):
-				self.o_target.tileEvent(True)
-				return
+			tmp = widgetAt(self, upd)
+			self._has_moved = True
+			if isinstance(tmp, InputTile):
+				self.o_target = tmp
+				if self.o_target != None and isinstance(self.o_target, InputTile):
+					self.o_target.tileEvent(True)
+					return
 		return super(Tile, self).mouseMoveEvent(event)
 
 	def moveEvent(self, event):
@@ -229,6 +242,19 @@ class Tile(QLabel):
 		#The glowing effect if needed
 		if self._glowing:
 			p.fillRect(event.rect(), QBrush(QColor(200, 0, 0, 100)))
+
+		#Add the personas
+		"""
+		i = 0
+		while i < len(self._data.players):
+			x = i//2 *20 + 10
+			y = i%2 *20 + 10
+			#Paint the dot
+			dot = QPainterPath()
+			dot.addEllipse(QRect(x, y, 10, 10))
+			p.fillpath(dot, QBrush(self.colors[self._data.players[i]]-1))
+			i+=1
+		"""
 
 		#Paint the border
 		p.setPen(QPen(Qt.gray, 3))
@@ -311,7 +337,7 @@ class InputTile(Tile):
 		painter.begin(self)
 		painter.setRenderHint(QPainter.Antialiasing)
 		painter.setClipPath(clipper)
-		
+
 		if self.tile_hovered:
 			painter.fillRect(self.rect(), QBrush(Qt.green))
 		else:

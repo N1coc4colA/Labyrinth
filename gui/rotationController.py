@@ -15,7 +15,7 @@ def intersectedInto(a, b):
 
 class RotationController(QWidget):
 	"""
-	Emits signal when needing to turn a widget by 90°
+	Input widget to rotate clockwise using degrees steps.
 	"""
 
 	valueChanged = pyqtSignal(int)
