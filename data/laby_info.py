@@ -26,7 +26,7 @@ class BoardBackend:
 		self.height = 7
 		self.width = 7
 
-		self.card = Card()
+		self.card_stack = CardStack()
 		self.all_tile = []
 
 		self.board = [[Tile(True, i+j*7, 'line') for i in range(self.width)] for j in range(self.height)]
@@ -49,27 +49,27 @@ class BoardBackend:
 			for y in range(7):
 				self.all_tile.append(self.board[x][y])
 
-		self.card.random()
+		self.card.randomize()
 		self.player = []
 		if nb_players == 1:
 			pass
 					#☺on verra plus tard pour le nombre de bots---------------------------------------------------------------------------------------------
 		elif nb_players == 2:
-			self.j1 = Persona(1, self.card.liste[:12])
-			self.j2 = Persona(3, self.card.liste[12:])
+			self.j1 = Persona(1, self.card_stack.part(2, 0))
+			self.j2 = Persona(3, self.card_stack.part(2, 1))
 			self.player.extend({self.j1, self.j2})
 
 		elif nb_players == 3:
-			self.j1 = Persona(1, self.card.liste[:5])
-			self.j2 = Persona(2, self.card.liste[6:12])
-			self.j3 = Persona(3, self.card.liste[12:18])
+			self.j1 = Persona(1, self.card_stack.part(3, 0))
+			self.j2 = Persona(2, self.card_stack.part(3, 1))
+			self.j3 = Persona(3, self.card_stack.part(3, 2))
 			self.player.extend({self.j1, self.j2, self.j3})
 
 		elif nb_players == 4:
-			self.j1 = Persona(1, self.card.liste[:6])
-			self.j2 = Persona(2, self.card.liste[6:12])
-			self.j3 = Persona(3, self.card.liste[12:18])
-			self.j4 = Persona(4, self.card.liste[18:])
+			self.j1 = Persona(1, self.card_stack.part(4, 0))
+			self.j2 = Persona(2, self.card_stack.part(4, 1))
+			self.j3 = Persona(3, self.card_stack.part(4, 2))
+			self.j4 = Persona(4, self.card_stack.part(4, 3))
 			self.player.extend({self.j1, self.j2, self.j3, self.j4})
 
 	def move(self, rank, start):
@@ -440,21 +440,56 @@ class Persona:
 		"""
 		self.location = (x, y)
 
-
 class Card:
 	"""
 	Backend object holding a card's dataset.
 	"""
-	def __init__(self):
-		self.liste = ["Pringles", "Dragon", "Passoire", "Langouste", "Bouteille", "Apple", "Ring", "LaserSaber", "PiderPig", "Covid", "Grale", "Meme", "Meme", "Kassos", "The Clap", "Batman", "Sun", "Homer", "Elon Musk", "Peery", "Pigeon", "Idefix", "Eye of Sauron", "oooooooooooo"]
+	def __init__(self, name):
+		self.name = name
+		self._pixmap = QPixmap("./images/card_" + str(name) + ".png")
 
-	def random(self):
+	def pixmap(self):
+		return self._pixmap
+
+class CardStack:
+	identifiers = ["Pringles", "Dragon", "Passoire", "Langouste", "Bouteille", "Apple", "Ring", "LaserSaber", "SpiderPig", "Covid", "Grale", "Meme", "Meme", "Kassos", "The Clap", "Batman", "Sun", "Homer", "Elon Musk", "Peery", "Kassos", "Astérix", "Eye of Sauron", "Pou"]
+
+	def __init__(self, source = []):
+		if not source:
+			self.content = []
+			for e in self.identifiers:
+				self.content.append(Card(e))
+		else:
+			self.content = source
+
+	def getContent(self):
+		return self.content
+
+	def randomize(self):
 		"""
 		Randomize the cards available.
 		"""
 		for i in range(0,24):
 			a, b = randint(0,23), randint(0,23)
 			self.liste[a], self.liste[b] = self.liste[b], self.liste[a]
+
+	def done(self):
+		self.content.pop()
+
+	def top(self):
+		return self.content[len(self.content)-1]
+
+	def isEmpty(self):
+		return len(self.content) != 0
+
+	def part(self, parts, part):
+		if self.isEmpty():
+			return []
+		size = len(self.content)/parts
+		return CardStack(self.content[(part*size):((part+1)*size)])
+
+	def __len__(self):
+		return len(self.content)
 
 
 class Pile:
