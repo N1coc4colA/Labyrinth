@@ -90,13 +90,19 @@ class BoardBackend:
 				for i in range(6):
 					self.board[i][rank], self.board[i+1][rank] = self.board[i+1][rank], self.board[i][rank]
 				self.board[6][rank], self.current = self.current, self.board[6][rank]
-				for i in self.player:
-					if i.location == (rank, 7):
-						i.setlocation(rank, 0)
+				if len(self.board[6][rank].player) != 0 :
+					for i in range(len(self.board[6][rank].player)) :
+						self.board[0][rank].player.append(self.board[6][rank].player.pop())
+					for i in self.player:
+						if i.location == (rank, 7):
+							i.setlocation(rank, 0)
 			elif start == 'down':
 				for i in range(6, 0, -1):
 					self.board[i][rank], self.board[i-1][rank] = self.board[i-1][rank], self.board[i][rank]
 				self.board[0][rank], self.current = self.current, self.board[0][rank]
+				if len(self.board[0][rank].player) != 0 :
+					for i in range(len(self.board[0][rank].player)) :
+						self.board[6][rank].player.append(self.board[0][rank].player.pop())
 				for i in self.player:
 					if i.location == (rank, 0):
 						i.setlocation(rank, 7)
@@ -104,6 +110,9 @@ class BoardBackend:
 				for i in range(6):
 					self.board[rank][i], self.board[rank][i+1] = self.board[rank][i+1], self.board[rank][i]
 				self.board[rank][6], self.current = self.current, self.board[rank][6]
+				if len(self.board[6][rank].player) != 0 :
+					for i in range(len(self.board[rank][6].player)) :
+						self.board[rank][0].player.append(self.board[rank][6].player.pop())
 				for i in self.player:
 					if i.location == (7, rank):
 						i.setlocation(0, rank)
@@ -111,6 +120,9 @@ class BoardBackend:
 				for i in range(6, 0, -1):
 					self.board[rank][i], self.board[rank][i-1] = self.board[rank][i-1], self.board[rank][i]
 				self.board[rank][0], self.current = self.current, self.board[rank][0]
+				if len(self.board[rank][0].player) != 0 :
+					for i in range(len(self.board[rank][0].player)) :
+						self.board[rank][6].player.append(self.board[rank][0].player.pop())
 				for i in self.player:
 					if i.location == (0, rank):
 						i.setlocation(7, rank)
@@ -119,6 +131,11 @@ class BoardBackend:
 
 
 	def graph(self):
+		"""
+		Cette méthode va non pas créé un graph mais va ajouter a chaque tuile ses voisins a partir de sa liste d'ouverture.
+		On peut alors parcourire le labirinth en passant de voisins en voisins
+		"""
+		
 		for x in range(7):
 			for y in range(7):
 				for i in self.board[x][y].openings:
@@ -142,6 +159,7 @@ class BoardBackend:
 							for j in self.board[x-1][y].openings:
 								if j == "e":
 									self.board[x][y].nearbies.append(self.board[x][y-1])
+
 
 	def find_road(self, start, end, visite, road):
 		"""
@@ -183,8 +201,6 @@ class BoardBackend:
 					self.board[i][j] = extern.pop()
 
 
-
-
 	def __str__(self):
 		out = " ____________________________________\n"
 		for l in self.board:
@@ -206,26 +222,29 @@ class Tile:
 	"""
 	Backend object holding a tile's dataset.
 	"""
-	def __init__(self, fixed, ID, road, objet = None, color = 0):
+	def __init__(self, fixed, ID, road, objet = None, color = 0, perso = []):
 		"""
 		Parameters
 		----------
 		fixed: bool
 			Make the tile fixed or not.
 
-		ID: int
+		ID : int
 			The tile's UID.
 
-		road: str
+		road : str
 			Has to be 'line' ("|"), 'angle' ("L") or 'triple' ("T").
 
-		objet: str, optional
+		objet : str, optional
 			Name of the object located on the tile. The default is None.
 
-		color: int, optional
+		color : int, optional
 			Has to be one of the followings: 0: no spawn (default), 1: white spawn, 2: turquoise spawn, 3: black spawn, 4: violet spawn
+
+		perso : list, optinnal
+			if there is no player on the tile : len(perso) = 0  |  1 for white player  |  2 for turquoise player  |  3 for black player  |  4 for violet player
 		"""
-		#self.pixmap = QPixmap("./images/tile_" + str(ID) + ".png")
+		self.pixmap = QPixmap("./images/tile_" + str(ID) + ".png")
 		self.item = objet
 		self.static = fixed
 		self.spawn = color
@@ -235,6 +254,7 @@ class Tile:
 		self.nearbies = []
 		self.openings = []
 		self.findOpenings()
+		self.player = perso
 
 	def isPlayable(self, rank):
 		"""
@@ -378,6 +398,14 @@ class Tile:
 			self.openings.extend(['n', 's'])
 		else:
 			self.openings.extend({"angle": [['s','e'], ['s','o'], ['n','o'], ['n','e']], "triple": [['e','s'],['o','e','s'],['n','o','s'],['n','o','e']]}[self.road][self.orientation])
+
+	def addPlayer(self, add) :
+		self.player.append(add)
+
+	def popPlayer(self, pop) :
+		for i in range(len(self.player)) :
+			if self.player[i] == pop :
+				self.player.pop(i)
 
 
 class Persona:
