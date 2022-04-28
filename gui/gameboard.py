@@ -4,6 +4,7 @@ from PyQt5.QtCore import *
 
 from gui.tile import Tile, InputTile
 from gui.rotationController import RotationController
+from gui.cardStack import CardStack
 
 def ensureRaised(w):
 	"""
@@ -62,6 +63,7 @@ class Board(QWidget):
 
 		self.backend = None
 		self.controller = RotationController(self)
+		self.cardStack = CardStack(self)
 		self.controller.setFixedSize(150, 50)
 		self.controller.valueChanged.connect(self.rotateTile)
 
@@ -83,6 +85,7 @@ class Board(QWidget):
 		self.backend = bkd
 		self.setTilesData(bkd.board)
 		self.currentlyUsed.setInternalData(bkd.current)
+		self.cardStack.setStack(bkd.player[0])
 		print("Backend's current:", bkd.current.getId())
 
 	def forceUpdate(self):
@@ -167,6 +170,8 @@ class Board(QWidget):
 		self.layoutTable(event.size())
 		#Move the controller
 		self.controller.move(event.size().width() - 5 - self.controller.width(), event.size().height() - 5 - self.controller.height())
+		#Move the stack
+		self.card_stack.move(event.size().width() - 5 - self.card_stack.width(), 10)
 		#Move the current tile if needed.
 		if self.currentlyUsed and self.currentlyUsed.hasMoved():
 			self.currentlyUsed.move(20, 20)
