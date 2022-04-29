@@ -85,7 +85,7 @@ class Board(QWidget):
 		self.backend = bkd
 		self.setTilesData(bkd.board)
 		self.currentlyUsed.setInternalData(bkd.current)
-		self.cardStack.setStack(bkd.player[0])
+		self.cardStack.setStack(bkd.player[0].goal)
 		print("Backend's current:", bkd.current.getId())
 
 	def forceUpdate(self):
@@ -171,7 +171,7 @@ class Board(QWidget):
 		#Move the controller
 		self.controller.move(event.size().width() - 5 - self.controller.width(), event.size().height() - 5 - self.controller.height())
 		#Move the stack
-		self.card_stack.move(event.size().width() - 5 - self.card_stack.width(), 10)
+		self.cardStack.move(event.size().width() - 5 - self.cardStack.width(), 10)
 		#Move the current tile if needed.
 		if self.currentlyUsed and self.currentlyUsed.hasMoved():
 			self.currentlyUsed.move(20, 20)
