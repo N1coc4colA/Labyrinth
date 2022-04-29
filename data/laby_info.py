@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 from random import *
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap   
+ 
+def randomise(l) :
+    out = []
+    g = len(l)
+    for i in range(g) :
+        a = randint(0, len(l))
+        out.append(l.pop(a-1))
+    return out
 
 def isPlayable(rank):
 	"""
@@ -18,19 +26,11 @@ def isPlayable(rank):
 	"""
 	return rank%2 == 1
 
-def randomise(l) :
-    out = []
-    g = len(l)
-    for i in range(g) :
-        a = randint(0, len(l))
-        out.append(l.pop(a-1))
-    return out
-
 class BoardBackend:
 	"""
 	Main component of the labyrinth backend. Holds all  informations, handles operations and other miscellaneous things.
 	"""
-	def __init__(self, nb_players): #||||||||||||||||||||||||| mieux organiser la répartition des directions des chemins ||||||||||||||||||||||||||||||||||||
+	def __init__(self, nb_players): 
 		self.height = 7
 		self.width = 7
 
@@ -137,12 +137,33 @@ class BoardBackend:
 			print("Invalid pos:", rank)
 
 
+	def rotate(self, sens) :
+		"""
+	    Cette méthode permet de faire tourner une tuile sur elle meme | vers la droite si sens == True, vers la gauche sinon
+
+	    Parameters
+	    ----------
+	    sens : BOOL
+
+	    """
+		if sens :
+			if self.current.getOrientation == 4 :
+				self.current.setOrientation(0)
+			else :
+				self.setOrientation(self.getOrientation+1)
+		else :
+			if self.current.getOrientation == 0 :
+				self.current.setOrientation(4)
+			else :
+				self.setOrientation(self.getOrientation-1)
+
+
 	def graph(self):
 		"""
 		Cette méthode va non pas créé un graph mais va ajouter a chaque tuile ses voisins a partir de sa liste d'ouverture.
 		On peut alors parcourire le labirinth en passant de voisins en voisins
 		"""
-
+		
 		for x in range(7):
 			for y in range(7):
 				for i in self.board[x][y].openings:
@@ -174,9 +195,9 @@ class BoardBackend:
 								 -compare la taille des chemin est trouve le meilleur
 		Parameters
 		----------
-		start : TUPLE
+		start : TILE OBJECT
 			DESCRIPTION.
-		end : TYPE
+		end : TILE OBJECT
 			DESCRIPTION.
 		visite : LIST
 			liste des élèment déja visiter.
@@ -189,8 +210,8 @@ class BoardBackend:
 
 		"""
 		pass
-
-
+		
+    
 	def random(self) :
 		extern = []
 		for i in range(0, 7) :
@@ -461,13 +482,13 @@ class Card:
 class CardStack:
 	identifiers = randomise(["Pringles", "Dragon", "Passoire", "Langouste", "Bouteille", "Apple", "Ring", "LaserSaber", "SpiderPig", "Covid", "Grale", "Meme", "Meme", "Kassos", "The Clap", "Batman", "Sun", "Homer", "Elon Musk", "Peery", "Kassos", "Astérix", "Eye of Sauron", "Pou"])
 
-	def __init__(self, source = [], noForce = True):
-		if not source and noForce:
+	def __init__(self, source = []):
+		if len(source)==0 :
 			self.content = []
 			for e in self.identifiers:
 				self.content.append(Card(e))
 		else:
-			self.content = randomise(source)
+			self.content = source
 
 	def getContent(self):
 		return self.content
@@ -476,8 +497,6 @@ class CardStack:
 		self.content.pop()
 
 	def top(self):
-		if self.isEmpty():
-			return None
 		return self.content[len(self.content)-1]
 
 	def isEmpty(self):
@@ -485,10 +504,8 @@ class CardStack:
 
 	def part(self, parts, part):
 		if self.isEmpty():
-			print("Empty stack!")
-			return CardStack([], False)
+			return []
 		size = len(self.content)/parts
-		print(int(part*size), ":", int((part+1)*size))
 		return CardStack(self.content[int(part*size):int((part+1)*size)])
 
 	def __len__(self):
@@ -521,6 +538,8 @@ class Pile:
 
 	def __len__(self):
 		return len(self.pile)
+
+    
 
 g = BoardBackend(4)
 g.random()
