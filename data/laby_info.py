@@ -49,7 +49,6 @@ class BoardBackend:
 			for y in range(7):
 				self.all_tile.append(self.board[x][y])
 
-		self.card_stack.randomize()
 		self.player = []
 		if nb_players == 1:
 			pass
@@ -457,6 +456,7 @@ class CardStack:
 	def __init__(self, source = []):
 		if not source:
 			self.content = []
+			randomise(self.identifiers)
 			for e in self.identifiers:
 				self.content.append(Card(e))
 		else:
@@ -465,14 +465,6 @@ class CardStack:
 	def getContent(self):
 		return self.content
 
-	def randomize(self):
-		"""
-		Randomize the cards available.
-		"""
-		for i in range(0,24):
-			a, b = randint(0,23), randint(0,23)
-			self.identifiers[a], self.identifiers[b] = self.identifiers[b], self.identifiers[a]
-
 	def done(self):
 		self.content.pop()
 
@@ -480,13 +472,13 @@ class CardStack:
 		return self.content[len(self.content)-1]
 
 	def isEmpty(self):
-		return len(self.content) != 0
+		return len(self.content) == 0
 
 	def part(self, parts, part):
 		if self.isEmpty():
 			return []
 		size = len(self.content)/parts
-		return CardStack(self.content[(part*size):((part+1)*size)])
+		return CardStack(self.content[int(part*size):int((part+1)*size)])
 
 	def __len__(self):
 		return len(self.content)
