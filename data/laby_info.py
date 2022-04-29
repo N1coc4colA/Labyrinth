@@ -49,7 +49,7 @@ class BoardBackend:
 			for y in range(7):
 				self.all_tile.append(self.board[x][y])
 
-		self.card.randomize()
+		self.card_stack.randomize()
 		self.player = []
 		if nb_players == 1:
 			pass
@@ -471,7 +471,7 @@ class CardStack:
 		"""
 		for i in range(0,24):
 			a, b = randint(0,23), randint(0,23)
-			self.liste[a], self.liste[b] = self.liste[b], self.liste[a]
+			self.identifiers[a], self.identifiers[b] = self.identifiers[b], self.identifiers[a]
 
 	def done(self):
 		self.content.pop()
