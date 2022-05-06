@@ -218,11 +218,11 @@ class Board(QWidget):
 
 		Parameters
 		----------
-		val: int
-			The angle identifier.
+		val: bool
+			True: to the right.
 		"""
-		#[TODO] Implement it
-		pass
+		self.backend.rotate(val)
+		self.currentlyUsed.setInternalData(self.backend.current)
 
 	def rowOf(self, tile):
 		for x in range(7):

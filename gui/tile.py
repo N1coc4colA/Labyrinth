@@ -66,6 +66,7 @@ class Tile(QLabel):
 		self.setInternalData(d)
 
 		self._acceptsMoves = True
+		self._pixmap = QPixmap()
 
 	def hasMoved(self):
 		return not self._has_moved
@@ -109,7 +110,9 @@ class Tile(QLabel):
 		if not d.pixmap.isNull():
 			self.setPixmap(d.pixmap.scaled(self.width(), self.height()))
 		else:
-			self.pixmap = d.pixmap
+			rm = QTransform()
+			rm.rotate((0 if d.orientation == 0 else (90 if d.orientation == 1 else (180 if d.orientation == 2 else 270))));
+			self.pixmap = d.pixmap.transformed(rm)
 		self.update()
 
 	def internalData(self):

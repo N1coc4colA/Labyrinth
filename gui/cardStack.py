@@ -38,9 +38,9 @@ class CardStack(QWidget):
 		d = 50/len(self._stack)
 		i = 1
 		while i < l:
-			y = 200-(d*i)-1
+			y = 200-(d*(i+1))-20
 			img = QPainterPath()
-			img.addRoundedRect(QRectF(0, y, d*i+1, 200), 10, 10)
+			img.addRoundedRect(QRectF(0, y, 100, d*i+20), 10, 10)
 			p.fillPath(img, QBrush(Qt.gray))
 			p.setPen(QPen(Qt.black, 3))
 			p.drawPath(img)
