@@ -147,15 +147,15 @@ class BoardBackend:
 
 	    """
 		if sens :
-			if self.current.getOrientation == 4 :
+			if self.current.getOrientation() == 4 :
 				self.current.setOrientation(0)
 			else :
-				self.setOrientation(self.getOrientation+1)
+				self.setOrientation(self.current.getOrientation()+1)
 		else :
-			if self.current.getOrientation == 0 :
+			if self.current.getOrientation() == 0 :
 				self.current.setOrientation(4)
 			else :
-				self.setOrientation(self.getOrientation-1)
+				self.current.setOrientation(self.current.getOrientation()-1)
 
 
 	def graph(self):
@@ -195,10 +195,10 @@ class BoardBackend:
 								 -compare la taille des chemin est trouve le meilleur
 		Parameters
 		----------
-		start : TILE OBJECT
-			DESCRIPTION.
-		end : TILE OBJECT
-			DESCRIPTION.
+		start : INT
+			ID of Tile object
+		end : INT
+			ID of Tile object
 		visite : LIST
 			liste des élèment déja visiter.
 		road : LIST
@@ -210,7 +210,22 @@ class BoardBackend:
 
 		"""
 		pass
-		
+
+
+
+	def find_something(self, typ, som) :
+		if typ == "player" :
+			for i in self.board :
+				for j in i :
+					if som in j.player :
+						return j.getId()
+				return False
+		elif typ == "object" :
+			for i in self.board :
+				for j in i :
+					if som == j.getItem() :
+						return j.getId()
+				return False
     
 	def random(self) :
 		extern = []
