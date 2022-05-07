@@ -150,7 +150,7 @@ class BoardBackend:
 			if self.current.getOrientation() == 4 :
 				self.current.setOrientation(0)
 			else :
-				self.setOrientation(self.current.getOrientation()+1)
+				self.current.setOrientation(self.current.getOrientation()+1)
 		else :
 			if self.current.getOrientation() == 0 :
 				self.current.setOrientation(4)
@@ -189,16 +189,16 @@ class BoardBackend:
 									self.board[x][y].nearbies.append(self.board[x][y-1])
 
 
-	def find_road(self, start, end, visite, road):
+	def find_road(self, start, end, visite = [], road = []):
 		"""
 		il faut une fonction qui -trouve les cooedonné de l'objet sur le tableau
 								 -compare la taille des chemin est trouve le meilleur
 		Parameters
 		----------
-		start : INT
-			ID of Tile object
-		end : INT
-			ID of Tile object
+		start : Tile object
+			
+		end : Tile object
+			
 		visite : LIST
 			liste des élèment déja visiter.
 		road : LIST
@@ -209,8 +209,14 @@ class BoardBackend:
 		None.
 
 		"""
-		pass
-
+		visite.append(start)
+		road.append(start)
+		for i in start.nearbies :
+			if end == i :
+				road.append(end)
+				return road
+		for j in start.nearbies :
+			return self.find_road(j, end, visite, road)
 
 
 	def find_something(self, typ, som) :
@@ -218,13 +224,13 @@ class BoardBackend:
 			for i in self.board :
 				for j in i :
 					if som in j.player :
-						return j.getId()
+						return j
 				return False
 		elif typ == "object" :
 			for i in self.board :
 				for j in i :
 					if som == j.getItem() :
-						return j.getId()
+						return j
 				return False
     
 	def random(self) :
@@ -559,3 +565,4 @@ class Pile:
 g = BoardBackend(4)
 g.random()
 g.graph()
+#print(g.find_road(g.find_something("player", 1), g.find_something("object", "Dragon")))
