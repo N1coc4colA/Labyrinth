@@ -79,6 +79,9 @@ class BoardBackend:
 			self.j4 = Persona(4, self.card_stack.part(4, 3))
 			self.player.extend({self.j1, self.j2, self.j3, self.j4})
 
+		self.random()
+		self.graph()
+
 	def move(self, rank, start):
 		"""
 		Submit the move requested.
@@ -563,6 +566,4 @@ class Pile:
     
 
 g = BoardBackend(4)
-g.random()
-g.graph()
 #print(g.find_road(g.find_something("player", 1), g.find_something("object", "Dragon")))
