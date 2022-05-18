@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from random import *
-from PyQt5.QtGui import QPixmap   
- 
+from PyQt5.QtGui import QPixmap
+
 def randomise(l) :
     out = []
     g = len(l)
@@ -30,7 +30,7 @@ class BoardBackend:
 	"""
 	Main component of the labyrinth backend. Holds all  informations, handles operations and other miscellaneous things.
 	"""
-	def __init__(self, nb_players): 
+	def __init__(self, nb_players):
 		self.height = 7
 		self.width = 7
 
@@ -78,9 +78,6 @@ class BoardBackend:
 			self.j3 = Persona(3, self.card_stack.part(4, 2))
 			self.j4 = Persona(4, self.card_stack.part(4, 3))
 			self.player.extend({self.j1, self.j2, self.j3, self.j4})
-
-		self.random()
-		self.graph()
 
 	def move(self, rank, start):
 		"""
@@ -166,7 +163,7 @@ class BoardBackend:
 		Cette méthode va non pas créé un graph mais va ajouter a chaque tuile ses voisins a partir de sa liste d'ouverture.
 		On peut alors parcourire le labirinth en passant de voisins en voisins
 		"""
-		
+
 		for x in range(7):
 			for y in range(7):
 				for i in self.board[x][y].openings:
@@ -192,16 +189,16 @@ class BoardBackend:
 									self.board[x][y].nearbies.append(self.board[x][y-1])
 
 
-	def find_road(self, start, end, visite = [], road = []):
+	def find_road(self, start, end, visite, road):
 		"""
 		il faut une fonction qui -trouve les cooedonné de l'objet sur le tableau
 								 -compare la taille des chemin est trouve le meilleur
 		Parameters
 		----------
-		start : Tile object
-			
-		end : Tile object
-			
+		start : TILE OBJECT
+			DESCRIPTION.
+		end : TILE OBJECT
+			DESCRIPTION.
 		visite : LIST
 			liste des élèment déja visiter.
 		road : LIST
@@ -212,30 +209,9 @@ class BoardBackend:
 		None.
 
 		"""
-		visite.append(start)
-		road.append(start)
-		for i in start.nearbies :
-			if end == i :
-				road.append(end)
-				return road
-		for j in start.nearbies :
-			return self.find_road(j, end, visite, road)
+		pass
 
 
-	def find_something(self, typ, som) :
-		if typ == "player" :
-			for i in self.board :
-				for j in i :
-					if som in j.player :
-						return j
-				return False
-		elif typ == "object" :
-			for i in self.board :
-				for j in i :
-					if som == j.getItem() :
-						return j
-				return False
-    
 	def random(self) :
 		extern = []
 		for i in range(0, 7) :
@@ -263,10 +239,11 @@ class BoardBackend:
 					v = " " + v
 				out += " " + v + " |"
 			out += "\n"
-		out += " ------------------------------------\n |"
+		out += " ------------------------------------\n | "
 		v = str(self.current.getId())
 		if len(v)  < 2:
 			v = " " + v
+		out += v
 		out += " |\n ------\n"
 		return out
 
@@ -563,7 +540,8 @@ class Pile:
 	def __len__(self):
 		return len(self.pile)
 
-    
+
 
 g = BoardBackend(4)
-#print(g.find_road(g.find_something("player", 1), g.find_something("object", "Dragon")))
+g.random()
+g.graph()
