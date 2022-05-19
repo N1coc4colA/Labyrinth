@@ -63,22 +63,44 @@ class BoardBackend:
 					#☺on verra plus tard pour le nombre de bots---------------------------------------------------------------------------------------------
 		elif nb_players == 2:
 			self.j1 = Persona(1, self.card_stack.part(2, 0))
+			self.board[0][0].player.append(1)
 			self.j2 = Persona(3, self.card_stack.part(2, 1))
+			self.board[6][6].player.append(3)
 			self.player.extend({self.j1, self.j2})
 
 		elif nb_players == 3:
 			self.j1 = Persona(1, self.card_stack.part(3, 0))
+			self.board[0][0].player.append(1)
 			self.j2 = Persona(2, self.card_stack.part(3, 1))
+			self.board[0][6].player.append(2)
 			self.j3 = Persona(3, self.card_stack.part(3, 2))
+			self.board[6][6].player.append(3)
 			self.player.extend({self.j1, self.j2, self.j3})
 
 		elif nb_players == 4:
 			self.j1 = Persona(1, self.card_stack.part(4, 0))
+			self.board[0][0].player.append(1)
 			self.j2 = Persona(2, self.card_stack.part(4, 1))
+			self.board[0][6].player.append(2)
 			self.j3 = Persona(3, self.card_stack.part(4, 2))
+			self.board[6][6].player.append(3)
 			self.j4 = Persona(4, self.card_stack.part(4, 3))
+			self.board[6][0].player.append(4)
 			self.player.extend({self.j1, self.j2, self.j3, self.j4})
 
+		self.distribute_items()
+		self.random()
+		self.graph()
+            
+	def distribute_items (self) :
+		i = self.card_stack.identifiers
+		while i != [] :
+			v = i.pop()
+			a, b = randint(0, 6), randint(0, 6)
+			while self.board[a][b].getItem() != None :
+				a, b = randint(0, 6), randint(0, 6)
+			self.board[a][b].setItem(v)
+                
 	def move(self, rank, start):
 		"""
 		Submit the move requested.
@@ -189,28 +211,54 @@ class BoardBackend:
 									self.board[x][y].nearbies.append(self.board[x][y-1])
 
 
-	def find_road(self, start, end, visite, road):
+	def find_road(self, start, end, visite = [], road = []):
 		"""
 		il faut une fonction qui -trouve les cooedonné de l'objet sur le tableau
 								 -compare la taille des chemin est trouve le meilleur
 		Parameters
 		----------
+		start : Tile object
+			
+		end : Tile object
+			
 		start : TILE OBJECT
 			DESCRIPTION.
+            
 		end : TILE OBJECT
 			DESCRIPTION.
+            
 		visite : LIST
 			liste des élèment déja visiter.
+            
 		road : LIST
-			liste qui contien le chemi pour aller au but.
-
+        
 		Returns
-		-------
-		None.
-
+        ----------
+        None
 		"""
-		pass
+		visite.append(start)
+		road.append(start)
+		for i in start.nearbies :
+			if end == i :
+				road.append(end)
+				return road
+		for j in start.nearbies :
+			if j not in visite :
+				return self.find_road(j, end, visite, road)
 
+	def find_something(self, typ, som) :
+		if typ == "player" :
+			for i in self.board :
+				for j in i :
+					if som in j.player :
+						return j
+				return False
+		elif typ == "object" :
+			for i in self.board :
+				for j in i :
+					if som == j.getItem() :
+						return j
+				return False
 
 	def random(self) :
 		extern = []
@@ -273,7 +321,7 @@ class Tile:
 		perso : list, optinnal
 			if there is no player on the tile : len(perso) = 0  |  1 for white player  |  2 for turquoise player  |  3 for black player  |  4 for violet player
 		"""
-		self.pixmap = QPixmap("./images/tile_" + str(ID) + ".png")
+		#self.pixmap = QPixmap("./images/tile_" + str(ID) + ".png")
 		self.item = objet
 		self.static = fixed
 		self.spawn = color
@@ -475,7 +523,7 @@ class Card:
 	"""
 	def __init__(self, name):
 		self.name = name
-		self._pixmap = QPixmap("./images/card_" + str(name) + ".png")
+		#self._pixmap = QPixmap("./images/card_" + str(name) + ".png")
 
 	def pixmap(self):
 		return self._pixmap
@@ -543,5 +591,4 @@ class Pile:
 
 
 g = BoardBackend(4)
-g.random()
-g.graph()
+print(g.find_road(g.find_something("player", 1), g.find_something("object", "Dragon")))
