@@ -320,7 +320,6 @@ class Board(QWidget):
 			self.running_animations.append(c)
 			for anim in self.running_animations:
 				anim.start()
-
 			self.backend.move(int(transformed-1), ("right" if horizontal else "down"))
 		else:
 			#First of all update all the table.
@@ -369,6 +368,10 @@ class Board(QWidget):
 			for anim in self.running_animations:
 				anim.start()
 
+			self.currentlyUsed.repaint()
+			self.resize(self.size()-QSize(1, 1))
+			self.resize(self.size()+QSize(1, 1))
+			self.currentlyUsed.setInternalData(self.backend.current)
 			self.backend.move(int(transformed)-1, ("left" if horizontal else "up"))
 
 		#Chec that it does work.

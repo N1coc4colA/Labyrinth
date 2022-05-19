@@ -113,7 +113,7 @@ class Tile(QLabel):
 			rm = QTransform()
 			rm.rotate((0 if d.orientation == 0 else (90 if d.orientation == 1 else (180 if d.orientation == 2 else 270))));
 			self.pixmap = d.pixmap.transformed(rm)
-		self.update()
+		self.repaint()
 
 	def internalData(self):
 		"""

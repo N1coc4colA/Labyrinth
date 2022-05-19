@@ -49,7 +49,7 @@ class CardStack(QWidget):
 		img = QPainterPath()
 		img.addRoundedRect(QRectF(0, 0, 100, 150), 10, 10)
 		p.fillPath(img, QBrush(Qt.gray)) #The card's BG
-		brush = QBrush(self._stack.top().pixmap()) #Build with the input pixmap
+		brush = QBrush(self._stack.top().pixmap().scaled(100, 150, Qt.KeepAspectRatio)) #Build with the input pixmap
 		p.fillPath(img, brush)
 		p.setPen(QPen(Qt.black, 3))
 		p.drawPath(img)
