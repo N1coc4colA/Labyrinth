@@ -63,29 +63,29 @@ class BoardBackend:
 					#☺on verra plus tard pour le nombre de bots---------------------------------------------------------------------------------------------
 		elif nb_players == 2:
 			self.j1 = Persona(1, self.card_stack.part(2, 0))
-			self.board[0][0].player.append(1)
+			self.board[0][0].addPlayer(1)
 			self.j2 = Persona(3, self.card_stack.part(2, 1))
-			self.board[6][6].player.append(3)
+			self.board[6][6].addPlayer(3)
 			self.player.extend({self.j1, self.j2})
 
 		elif nb_players == 3:
 			self.j1 = Persona(1, self.card_stack.part(3, 0))
-			self.board[0][0].player.append(1)
+			self.board[0][0].addPlayer(1)
 			self.j2 = Persona(2, self.card_stack.part(3, 1))
-			self.board[0][6].player.append(2)
+			self.board[0][6].addPlayer(2)
 			self.j3 = Persona(3, self.card_stack.part(3, 2))
-			self.board[6][6].player.append(3)
+			self.board[6][6].addPlayer(3)
 			self.player.extend({self.j1, self.j2, self.j3})
 
 		elif nb_players == 4:
 			self.j1 = Persona(1, self.card_stack.part(4, 0))
-			self.board[0][0].player.append(1)
+			self.board[0][0].addPlayer(1)
 			self.j2 = Persona(2, self.card_stack.part(4, 1))
-			self.board[0][6].player.append(2)
+			self.board[0][6].addPlayer(2)
 			self.j3 = Persona(3, self.card_stack.part(4, 2))
-			self.board[6][6].player.append(3)
+			self.board[6][6].addPlayer(3)
 			self.j4 = Persona(4, self.card_stack.part(4, 3))
-			self.board[6][0].player.append(4)
+			self.board[6][0].addPlayer(4)
 			self.player.extend({self.j1, self.j2, self.j3, self.j4})
 
 		self.distribute_items()
@@ -321,7 +321,7 @@ class Tile:
 		perso : list, optinnal
 			if there is no player on the tile : len(perso) = 0  |  1 for white player  |  2 for turquoise player  |  3 for black player  |  4 for violet player
 		"""
-		#self.pixmap = QPixmap("./images/tile_" + str(ID) + ".png")
+		self.pixmap = QPixmap("./images/tile_" + str(ID) + ".png")
 		self.item = objet
 		self.static = fixed
 		self.spawn = color
@@ -410,6 +410,17 @@ class Tile:
 		int
 		"""
 		return self.orientation
+    
+	def getPlayer(self):
+		return self.player
+    
+	def addPlayer(self, add) :
+		self.player.append(add)
+        
+	def popPlayer(self, sup) :
+		for i in range(len(self.player)) :
+			if sup == self.player[i]:
+				self.player.pop(i)
 
 	def setItem(self, item):
 		"""
@@ -523,7 +534,7 @@ class Card:
 	"""
 	def __init__(self, name):
 		self.name = name
-		#self._pixmap = QPixmap("./images/card_" + str(name) + ".png")
+		self._pixmap = QPixmap("./images/card_" + str(name) + ".png")
 
 	def pixmap(self):
 		return self._pixmap
