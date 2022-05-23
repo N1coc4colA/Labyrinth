@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
+from nothings import TestData
 from gui.tile import Tile, InputTile
 from gui.rotationController import RotationController
 from gui.cardStack import CardStack
@@ -43,14 +44,6 @@ def widgetAt(p, pos):
 
 def smartRaiseUp(p, pos):
 	pass
-
-class TestData:
-	def __init__(self, o = 0):
-		self.orientation = o
-		self.pixmap = QPixmap()
-
-	def getId(self):
-		return 0
 
 class Board(QWidget):
 	def __init__(self, parent = None):
@@ -374,7 +367,7 @@ class Board(QWidget):
 			self.currentlyUsed.setInternalData(self.backend.current)
 			self.backend.move(int(transformed)-1, ("left" if horizontal else "up"))
 
-		#Chec that it does work.
+		#Check that it does work.
 		print(self.backend)
 
 		#Push update to BKD

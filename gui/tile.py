@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import QApplication
+from nothings import TestData
 
 def ensureRaised(w):
 	"""
@@ -107,12 +108,12 @@ class Tile(QLabel):
 
 		"""
 		self._data = d
-		if not d.pixmap.isNull():
-			self.setPixmap(d.pixmap.scaled(self.width(), self.height()))
+		if d.pixmap.isNull():
+			if not isinstance(d, TestData):
+				print("Tile", d.getId(), "has not pixmap!")
+			self._pixmap = d.pixmap
 		else:
-			rm = QTransform()
-			rm.rotate((0 if d.orientation == 0 else (90 if d.orientation == 1 else (180 if d.orientation == 2 else 270))));
-			self.pixmap = d.pixmap.transformed(rm)
+			self._pixmap = d.pixmap.transformed(QTransform().rotate((0 if d.orientation == 0 else (90 if d.orientation == 1 else (180 if d.orientation == 2 else 270)))))
 		self.repaint()
 
 	def internalData(self):
@@ -238,28 +239,36 @@ class Tile(QLabel):
 		p.setClipPath(clipper)
 
 		#Draw the pixmap
-		if self._data.pixmap.isNull():
+		if self._pixmap.isNull():
 			p.fillRect(event.rect(), QBrush(QColor(100, 200, 200, 250)))
 		else:
-			p.drawPixmap(event.rect(), self._data.pixmap.scaled(self.width(), self.height()), event.rect())
+			p.drawPixmap(event.rect(), self._pixmap.scaled(self.width(), self.height()), event.rect())
+
+		#Paint the spawn
+		if self._data.getSpawn() != 0:
+			p.setBrush(QBrush(self._data.spawnColors[self._data.getSpawn()-1]))
+			p.setPen(QPen(Qt.gray, 2))
+			p.drawEllipse(QRect(20, 20, 30, 30))
+
 		#The glowing effect if needed
 		if self._glowing:
 			p.fillRect(event.rect(), QBrush(QColor(200, 0, 0, 100)))
 
 		#Add the personas
-		"""
 		i = 0
-		while i < len(self._data.players):
+		while i < len(self._data.getPlayer()):
 			x = i//2 *20 + 10
 			y = i%2 *20 + 10
 			#Paint the dot
 			dot = QPainterPath()
-			dot.addEllipse(QRect(x, y, 10, 10))
-			p.fillpath(dot, QBrush(self.colors[self._data.players[i]]-1))
+			dot.addEllipse(QRectF(x, y, 10, 10))
+			p.setPen(QPen(Qt.gray, 2))
+			p.drawPath(dot)
+			p.fillPath(dot, QBrush(self.colors[self._data.getPlayer()[i]-1]))
 			i+=1
-		"""
 
 		#Paint the border
+		p.setBrush(Qt.transparent)
 		p.setPen(QPen(Qt.gray, 3))
 		p.drawPath(clipper)
 
