@@ -1,4 +1,4 @@
-#This file looks like shit due to python itself. Pitty for it.
+#This file looks like crap because of python itself. Pitiful python.
 
 from PyQt5.QtWidgets import QApplication
 import sys
