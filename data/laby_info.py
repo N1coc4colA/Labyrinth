@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 from random import *
-#from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QColor
 
 def randomise(l) :
     out = []
@@ -37,7 +36,11 @@ class BoardBackend:
 		self.card_stack = CardStack()
 		self.all_tile = []
 
-		self.board = [[Tile(True, i+j*7, 'line') for i in range(self.width)] for j in range(self.height)]
+		self.board = []
+		for i in range(self.width):
+			self.board.append([])
+			for j in range(self.height):
+				self.board[i].append(Tile(True, i*(self.width-1)+j, 'line'))
 		self.current = Tile(True, 49, 'line') #The actual tile
 
 		for i in range(self.width):
@@ -45,8 +48,8 @@ class BoardBackend:
 				if (i == 0 or i == self.width-1) and (j == 0 or j == self.height-1):
 					self.board[i][j].setStat(False)
 					self.board[i][j].setRoad("angle")
-					self.board[i][j].setColor((j + i*2)//7+1)
-					self.board[i][j].setOrientation((j + i*2)//7)
+					self.board[i][j].setColor(((j + i*(self.width-1))//6+1) if i != self.width-1 else ((j + i*(self.width-1))//6-3))
+					self.board[i][j].setOrientation((j + i*2)//6)
 				elif i%2==0 and j%2==0:
 					self.board[i][j].setStat(False)
 					self.board[i][j].setRoad('triple')
@@ -176,11 +179,10 @@ class BoardBackend:
 				self.current.setOrientation(0)
 			else :
 				self.current.setOrientation(self.current.getOrientation()+1)
+		elif self.current.getOrientation() == 0 :
+			self.current.setOrientation(4)
 		else :
-			if self.current.getOrientation() == 0 :
-				self.current.setOrientation(4)
-			else :
-				self.current.setOrientation(self.current.getOrientation()-1)
+			self.current.setOrientation(self.current.getOrientation()-1)
 
 
 	def graph(self):
@@ -316,22 +318,24 @@ class BoardBackend:
 			out += " |"
 			for e in l:
 				v = str(e.getId())
-				if len(v)  < 2:
+				if len(v) < 2:
 					v = " " + v
 				out += " " + v + " |"
-			out += "\n"
-		out += " ------------------------------------\n | "
+			#out += "\n"
+			out += "\n |__________________________________| \n"
 		v = str(self.current.getId())
 		if len(v)  < 2:
 			v = " " + v
-		out += v
-		out += " |\n ------\n"
+		out += " | " + v
+		out += " |\n |____|\n"
 		return out
 
 class Tile:
 	"""
 	Backend object holding a tile's dataset.
 	"""
+	spawnColors = [QColor("#fff"), QColor("#1cb0ad"), QColor("#2B2A33"), QColor("#8c00ff")]
+
 	def __init__(self, fixed, ID, road, objet = None, color = 0, perso = []):
 		"""
 		Parameters
@@ -354,7 +358,8 @@ class Tile:
 		perso : list, optinnal
 			if there is no player on the tile : len(perso) = 0  |  1 for white player  |  2 for turquoise player  |  3 for black player  |  4 for violet player
 		"""
-		#self.pixmap = QPixmap("./images/tile_" + str(ID) + ".png")
+
+		self.pixmap = QPixmap("./images/tile_" + str(ID) + ".png")
 		self.item = objet
 		self.static = fixed
 		self.spawn = color
@@ -365,6 +370,8 @@ class Tile:
 		self.openings = []
 		self.findOpenings()
 		self.player = perso
+		if len(self.player) != 0:
+			print("Not empty!!")
 
 	def isPlayable(self, rank):
 		"""
@@ -447,11 +454,13 @@ class Tile:
 	def getPlayer(self) :
 		return self.player
 
-	def addPlayer(self, add) :
+	def addPlayer(self, add):
+		print("Player", add, "added on", self._id)
 		self.player.append(add)
 
-	def popPlayer(self, sup) :
-		for i in range(len(self.player)) :
+	def popPlayer(self, sup):
+		print("Player", sup, "removed of", self._id)
+		for i in range(len(self.player)):
 			if sup == self.player[i]:
 				self.player.pop(i)
 
@@ -519,15 +528,6 @@ class Tile:
 			self.openings.extend(['n', 's'])
 		else:
 			self.openings.extend({"angle": [['s','e'], ['s','o'], ['n','o'], ['n','e']], "triple": [['e','s'],['o','e','s'],['n','o','s'],['n','o','e']]}[self.road][self.orientation])
-
-	def addPlayer(self, add) :
-		self.player.append(add)
-
-	def popPlayer(self, pop) :
-		for i in range(len(self.player)) :
-			if self.player[i] == pop :
-				self.player.pop(i)
-
 
 class Persona:
 	"""
@@ -600,7 +600,7 @@ class Card:
 	"""
 	def __init__(self, name):
 		self.name = name
-		#self._pixmap = QPixmap("./images/card_" + str(name) + ".png")
+		self._pixmap = QPixmap("./images/card_" + str(name) + ".png")
 
 	def pixmap(self):
 		return self._pixmap
@@ -609,7 +609,7 @@ class CardStack:
 	identifiers = randomise(["Pringles", "Dragon", "Passoire", "Langouste", "Bouteille", "Apple", "Ring", "LaserSaber", "SpiderPig", "Covid", "Grale", "Meme", "Meme", "Kassos", "The Clap", "Batman", "Sun", "Homer", "Elon Musk", "Peery", "Kassos", "Astérix", "Eye of Sauron", "Pou"])
 
 	def __init__(self, source = []):
-		if len(source)==0 :
+		if len(source) == 0:
 			self.content = []
 			for e in self.identifiers:
 				self.content.append(Card(e))
@@ -664,8 +664,3 @@ class Pile:
 
 	def __len__(self):
 		return len(self.pile)
-
-
-
-g = BoardBackend(4)
-print(g.find_road(g.find_something("player", 1), g.find_something("object", "Dragon")))
