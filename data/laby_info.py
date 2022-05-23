@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from random import *
-from PyQt5.QtGui import QPixmap
+#from PyQt5.QtGui import QPixmap
 
 def randomise(l) :
     out = []
@@ -91,7 +91,10 @@ class BoardBackend:
 		self.distribute_items()
 		self.random()
 		self.graph()
-            
+		for i in self.player :
+			i.SetMap(self)
+
+
 	def distribute_items (self) :
 		i = self.card_stack.identifiers
 		while i != [] :
@@ -100,7 +103,7 @@ class BoardBackend:
 			while self.board[a][b].getItem() != None :
 				a, b = randint(0, 6), randint(0, 6)
 			self.board[a][b].setItem(v)
-                
+
 	def move(self, rank, start):
 		"""
 		Submit the move requested.
@@ -218,20 +221,20 @@ class BoardBackend:
 		Parameters
 		----------
 		start : Tile object
-			
+
 		end : Tile object
-			
+
 		start : TILE OBJECT
 			DESCRIPTION.
-            
+
 		end : TILE OBJECT
 			DESCRIPTION.
-            
+
 		visite : LIST
 			liste des élèment déja visiter.
-            
+
 		road : LIST
-        
+
 		Returns
         ----------
         None
@@ -247,20 +250,50 @@ class BoardBackend:
 				return self.find_road(j, end, visite, road)
 
 	def find_something(self, typ, som) :
+		"""
+		Cette méthode permet de trouver la tuile sur laquel se trouve un obJET ou un personnage
+
+		Parameters
+		----------
+		typ : TYPE
+			DESCRIPTION.
+		som : TYPE
+			DESCRIPTION.
+
+		Returns
+		-------
+		TYPE
+			DESCRIPTION.
+
+		"""
 		if typ == "player" :
 			for i in self.board :
 				for j in i :
 					if som in j.player :
 						return j
-				return False
+			return False
 		elif typ == "object" :
 			for i in self.board :
 				for j in i :
 					if som == j.getItem() :
 						return j
-				return False
+			return False
+		elif typ == "tile" :
+			for i in range(7) :
+				for j in range(7) :
+					if som == self.board[i][j] :
+						return (i, j)
+			return False
 
 	def random(self) :
+		"""
+		Cette methode permet de randomiser la position et la rotation des tuile mouvente sur le plateau
+
+		Returns
+		-------
+		None.
+
+		"""
 		extern = []
 		for i in range(0, 7) :
 			for j in range(0, 7) :
@@ -321,7 +354,7 @@ class Tile:
 		perso : list, optinnal
 			if there is no player on the tile : len(perso) = 0  |  1 for white player  |  2 for turquoise player  |  3 for black player  |  4 for violet player
 		"""
-		self.pixmap = QPixmap("./images/tile_" + str(ID) + ".png")
+		#self.pixmap = QPixmap("./images/tile_" + str(ID) + ".png")
 		self.item = objet
 		self.static = fixed
 		self.spawn = color
@@ -410,13 +443,13 @@ class Tile:
 		int
 		"""
 		return self.orientation
-    
-	def getPlayer(self):
+
+	def getPlayer(self) :
 		return self.player
-    
+
 	def addPlayer(self, add) :
 		self.player.append(add)
-        
+
 	def popPlayer(self, sup) :
 		for i in range(len(self.player)) :
 			if sup == self.player[i]:
@@ -504,6 +537,8 @@ class Persona:
 		self.goal = pile
 		self.color = color
 		self.location = [None, (0, 0), (7, 0), (7, 7), (0, 7)][self.color]
+		self.mapp = [[False for i in range(7)] for j in range(7)]
+
 
 	def getLocation(self):
 		"""
@@ -528,13 +563,44 @@ class Persona:
 		"""
 		self.location = (x, y)
 
+	def SetMap(self, board, use = None, visite =[], init = False) :
+		"""
+	    cette méthodes doit faire un plan du labirynthe où le joueur peut se rendre
+
+	    Parameters
+	    ----------
+	    board : TYPE
+	        DESCRIPTION.
+	    use : TYPE, optional
+	        DESCRIPTION. The default is None.
+	    init : TYPE, optional
+	        DESCRIPTION. The default is False.
+
+	    Returns
+	    -------
+	    None.
+
+	    """
+		if init == False :
+			use = board.find_something("player", self.color)
+			loc_use = board.find_something("tile", use)
+			self.mapp[loc_use[0]][loc_use[1]] = 0
+			visite.append(use)
+			init = True
+		for i in use.nearbies :
+			loc_i = board.find_something("tile", i)
+			if self.mapp[loc_i[0]][loc_i[1]] != True and i not in visite:
+				self.mapp[loc_i[0]][loc_i[1]] = True
+				visite.append(use)
+				self.SetMap(board, i, visite, init)
+
 class Card:
 	"""
 	Backend object holding a card's dataset.
 	"""
 	def __init__(self, name):
 		self.name = name
-		self._pixmap = QPixmap("./images/card_" + str(name) + ".png")
+		#self._pixmap = QPixmap("./images/card_" + str(name) + ".png")
 
 	def pixmap(self):
 		return self._pixmap
