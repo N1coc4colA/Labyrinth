@@ -250,6 +250,10 @@ class Tile(QLabel):
 			p.setPen(QPen(Qt.gray, 2))
 			p.drawEllipse(QRect(20, 20, 30, 30))
 
+		#Paint the object
+		if not self._data.object.isNull():
+
+
 		#The glowing effect if needed
 		if self._glowing:
 			p.fillRect(event.rect(), QBrush(QColor(200, 0, 0, 100)))

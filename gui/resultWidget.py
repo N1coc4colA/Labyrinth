@@ -4,7 +4,7 @@ from PyQt5.QtCore import *
 
 class ResultWidget(QLabel):
 	"""
-	UI widget used as a tile.
+	Shows wether you won or not with an animation.
 	"""
 
 	def __init__(self, d, parent = None):

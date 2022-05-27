@@ -51,6 +51,15 @@ class RotationController(QWidget):
 		self._value = v
 
 	def value(self):
+		"""
+		Get the value.
+
+		Returns
+		-------
+		int
+			Current value.
+
+		"""
 		if self._convertToSteps:
 			return self._value//self._step
 		return self._value
@@ -62,6 +71,7 @@ class RotationController(QWidget):
 		self.valueChanged.emit(self.value())
 
 	def pointInside(self, p):
+		#Used to ensure that the click is into the good part of the button.
 		if (p.y() > 5 and p.y() < (5 + self._itemSize[1])):
 			if p.x() > 5 and p.x() < (5 + self._itemSize[0]):
 				return 1
@@ -123,6 +133,7 @@ class RotationController(QWidget):
 		self.repaint()
 		super(RotationController, self).mouseMoveEvent(e)
 
+	#Separate both button painting to avoid making useless painting.
 	def paintPixmapRight(self, e, p):
 		p.drawPixmap(QRect(5 + self._itemSize[0] + (self._itemSize[0] - self._lowest)/2, 5 + (self._itemSize[1] - self._lowest)/2, self._lowest, self._lowest), self._pixmaps[1])
 

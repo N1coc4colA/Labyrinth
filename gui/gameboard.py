@@ -46,6 +46,10 @@ def smartRaiseUp(p, pos):
 	pass
 
 class Board(QWidget):
+	"""
+	The main window of the game, holding all UI elements.
+	"""
+
 	def __init__(self, parent = None):
 		super(Board, self).__init__(parent)
 		self.setMinimumSize(730, 730)
@@ -65,23 +69,70 @@ class Board(QWidget):
 		self._timer.setSingleShot(True)
 		self._timer.timeout.connect(self.unlock)
 
+		#Make it big enough.
+		self.playerTitle = QLabel(self)
+		self.playerTitle.setText(self.tr("Joueur 1"))
+		self.playerTitle.move(110, 5)
+		f = self.playerTitle.font()
+		f.setPointSize(16)
+		f.setBold(True)
+		self.playerTitle.setFont(f)
+
 	def unlock(self):
+		"""
+		Enable user inputs after the UI has been locked for any reason (e.g. animations).
+
+		Returns
+		-------
+		None.
+
+		"""
 		ensureRaised(self.currentlyUsed)
 		self.layoutTable(self.size()) #Needed as sometimes, tiles' position fails (SAD)
 		self.setEnabled(True)
 
 	def lockForAnims(self):
+		"""
+		Makes impossible for the user to move anything until the animations finished.
+
+		Returns
+		-------
+		None.
+
+		"""
 		self._timer.stop()
 		self._timer.start()
 
 	def setBackend(self, bkd):
+		"""
+		Set the backend, data that has to be represented by the UI.
+
+		Parameters
+		----------
+		bkd : TYPE
+			DESCRIPTION.
+
+		Returns
+		-------
+		None.
+
+		"""
 		self.backend = bkd
 		self.setTilesData(bkd.board)
 		self.currentlyUsed.setInternalData(bkd.current)
 		self.cardStack.setStack(bkd.player[0].goal)
+		self.playerTitle.setStyleSheet("color:" + bkd.current.spawnColors[bkd.j1.color-1].name() + ";")
 		print("Backend's current:", bkd.current.getId())
 
 	def forceUpdate(self):
+		"""
+		Force update of the tiles, as sometimes they don't move properly.
+
+		Returns
+		-------
+		None.
+
+		"""
 		for l in self.tiles:
 			for t in l:
 				t.update()
@@ -90,6 +141,11 @@ class Board(QWidget):
 	def load(self):
 		"""
 		Sets up all the tiles that goes with the board.
+
+		Returns
+		-------
+		None.
+
 		"""
 		#Fill with the main tiles
 		for x in range(7):
@@ -125,11 +181,37 @@ class Board(QWidget):
 		self.currentlyUsed = t
 
 	def setTilesData(self, dl):
+		"""
+		Set the internal data of each UI Tile object.
+
+		Parameters
+		----------
+		dl : list
+			List of lists containing the data.
+
+		Returns
+		-------
+		None.
+
+		"""
 		for i in range(7):
 			for j in range(7):
 				self.tiles[i][j].setInternalData(dl[i][j])
 
 	def layoutTable(self, size):
+		"""
+		Move the tiles to the right poistions after the window size changed.
+
+		Parameters
+		----------
+		size : QSizeF
+			Window's size.
+
+		Returns
+		-------
+		None.
+
+		"""
 		w = (size.width() - 630)/2
 		h = (size.height() - 630)/2
 
@@ -138,6 +220,7 @@ class Board(QWidget):
 			for y in range(7):
 				self.tiles[x][y].move(x*70+70+w, y*70+70+h)
 
+		#Also move the input tiles.
 		for i in range(7):
 			if i%2 == 1:
 				l = self.input_tiles[i-1]
@@ -218,6 +301,20 @@ class Board(QWidget):
 		self.currentlyUsed.setInternalData(self.backend.current)
 
 	def rowOf(self, tile):
+		"""
+		Get the row of a given tile.
+
+		Parameters
+		----------
+		tile : gui.tile.Tile
+			The tile to search
+
+		Returns
+		-------
+		int
+			The row, -1 if not found.
+
+		"""
 		for x in range(7):
 			for y in range(7):
 				if self.tiles[x][y] == tile:
@@ -225,6 +322,20 @@ class Board(QWidget):
 		return -1
 
 	def columnOf(self, tile):
+		"""
+		Get the column of a given tile.
+
+		Parameters
+		----------
+		tile : gui.tile.Tile
+			The tile to search
+
+		Returns
+		-------
+		int
+			The column, -1 if not found.
+
+		"""
 		for x in range(7):
 			for y in range(7):
 				if self.tiles[x][y] == tile:
@@ -232,6 +343,21 @@ class Board(QWidget):
 		return -1
 
 	def tileInsertion(self, source, target):
+		"""
+		Insert a tile into the board.
+
+		Parameters
+		----------
+		source : gui.tile.InputTile
+			The input tile that received the event.
+		target : gui.tile.Tile
+			The tile that has to be inserted.
+
+		Returns
+		-------
+		None.
+
+		"""
 		self.removeGlowing()
 
 		#Tell the backend that we're moving
@@ -361,6 +487,7 @@ class Board(QWidget):
 			for anim in self.running_animations:
 				anim.start()
 
+			#Update the UI depending on the backend.
 			self.currentlyUsed.repaint()
 			self.resize(self.size()-QSize(1, 1))
 			self.resize(self.size()+QSize(1, 1))
