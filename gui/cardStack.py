@@ -3,12 +3,28 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
 class CardStack(QWidget):
+	"""
+	Widget representing the cards of a player.
+	"""
 	def __init__(self, parent = None):
 		super(CardStack, self).__init__(parent)
 		self._stack = None
 		self.setFixedSize(100, 200)
 
 	def setStack(self, s):
+		"""
+		Set the internal data of the stack.
+
+		Parameters
+		----------
+		s : Unknown.
+			The data holder.
+
+		Returns
+		-------
+		None.
+
+		"""
 		self._stack = s
 		self.update()
 
@@ -22,6 +38,7 @@ class CardStack(QWidget):
 		p.setClipPath(path)
 		l = len(self._stack)
 
+		#Make it empty, so the user knows he has no more to look for anything.
 		if l == 0:
 			empty = QPainterPath()
 			empty.addRoundedRect(0, 50, 100, 150, 10, 10)
@@ -32,6 +49,7 @@ class CardStack(QWidget):
 			p.drawPath(empty)
 			return
 
+		#Paint the edges of the card that are not discovered yet.
 		d = 50/len(self._stack)
 		i = 1
 		while i < l:
@@ -43,6 +61,7 @@ class CardStack(QWidget):
 			p.drawPath(img)
 			i+=1
 
+		#Put the uncovered card.
 		img = QPainterPath()
 		img.addRoundedRect(QRectF(0, 0, 100, 150), 10, 10)
 		p.fillPath(img, QBrush(Qt.gray)) #The card's BG
