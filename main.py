@@ -1,5 +1,3 @@
-#This file looks like crap because of python itself. Pitiful python.
-
 from PyQt5.QtWidgets import QApplication
 import sys
 app = QApplication(sys.argv)
