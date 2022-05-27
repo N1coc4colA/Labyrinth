@@ -362,8 +362,8 @@ class Tile:
 		perso : list, optinnal
 			if there is no player on the tile : len(perso) = 0  |  1 for white player  |  2 for turquoise player  |  3 for black player  |  4 for violet player
 		"""
-
-		#self.pixmap = QPixmap("./images/tile_" + str(ID) + ".png")
+		self.object = QPixmap()
+		self.pixmap = QPixmap("./images/tile_" + str(ID) + ".png")
 		self.item = objet
 		self.static = fixed
 		self.spawn = color
@@ -477,6 +477,7 @@ class Tile:
 		item: str
 			The new item.
 		"""
+		self.object = QPixmap("./images/" + + ".png")
 		self.item = item
 
 	def setStat(self, stat):
@@ -677,5 +678,3 @@ class Pile:
 
 	def __len__(self):
 		return len(self.pile)
-
-g = BoardBackend(2)
