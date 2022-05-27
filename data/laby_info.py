@@ -96,6 +96,7 @@ class BoardBackend:
 		self.graph()
 		for i in self.player :
 			i.SetMap(self)
+			print(i.mapp)
 
 
 	def distribute_items (self) :
@@ -359,7 +360,7 @@ class Tile:
 			if there is no player on the tile : len(perso) = 0  |  1 for white player  |  2 for turquoise player  |  3 for black player  |  4 for violet player
 		"""
 
-		self.pixmap = QPixmap("./images/tile_" + str(ID) + ".png")
+		#self.pixmap = QPixmap("./images/tile_" + str(ID) + ".png")
 		self.item = objet
 		self.static = fixed
 		self.spawn = color
@@ -533,12 +534,13 @@ class Persona:
 	"""
 	Backend object holding a player's dataset.
 	"""
+	visite = []
+	mapp = [[False for i in range(7)] for j in range(7)]
+
 	def __init__(self, color, pile):
 		self.goal = pile
 		self.color = color
 		self.location = [None, (0, 0), (7, 0), (7, 7), (0, 7)][self.color]
-		self.mapp = [[False for i in range(7)] for j in range(7)]
-
 
 	def getLocation(self):
 		"""
@@ -562,6 +564,10 @@ class Persona:
 			y index.
 		"""
 		self.location = (x, y)
+  
+	def initMap(self) :
+		self.visite = []
+		self.mapp = [[False for i in range(7)] for j in range(7)]
 
 	def SetMap(self, board, use = None, visite =[], init = False) :
 		"""
@@ -582,16 +588,17 @@ class Persona:
 
 	    """
 		if init == False :
+			self.initMap()
 			use = board.find_something("player", self.color)
 			loc_use = board.find_something("tile", use)
 			self.mapp[loc_use[0]][loc_use[1]] = 0
-			visite.append(use)
+			self.visite.append(use)
 			init = True
 		for i in use.nearbies :
 			loc_i = board.find_something("tile", i)
-			if self.mapp[loc_i[0]][loc_i[1]] != True and i not in visite:
+			if self.mapp[loc_i[0]][loc_i[1]] != True and i not in self.visite :
 				self.mapp[loc_i[0]][loc_i[1]] = True
-				visite.append(use)
+				self.visite.append(use)
 				self.SetMap(board, i, visite, init)
 
 class Card:
@@ -600,7 +607,7 @@ class Card:
 	"""
 	def __init__(self, name):
 		self.name = name
-		self._pixmap = QPixmap("./images/card_" + str(name) + ".png")
+		#self._pixmap = QPixmap("./images/card_" + str(name) + ".png")
 
 	def pixmap(self):
 		return self._pixmap
@@ -664,3 +671,5 @@ class Pile:
 
 	def __len__(self):
 		return len(self.pile)
+
+g = BoardBackend(2)
