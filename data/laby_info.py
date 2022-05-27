@@ -100,6 +100,9 @@ class BoardBackend:
 
 
 	def distribute_items (self) :
+		"""
+		Cette méthodes va distribuer les object sur le plato, aléatoirement sur les cases
+		"""
 		i = self.card_stack.identifiers
 		while i != [] :
 			v = i.pop()
@@ -566,12 +569,15 @@ class Persona:
 		self.location = (x, y)
   
 	def initMap(self) :
+		"""
+		cette méthodes initialise et vide les données des variables global qui serve pour la map
+		"""
 		self.visite = []
 		self.mapp = [[False for i in range(7)] for j in range(7)]
 
 	def SetMap(self, board, use = None, visite =[], init = False) :
 		"""
-	    cette méthodes doit faire un plan du labirynthe où le joueur peut se rendre
+	    cette méthodes doit faire un mini plan du labirynthe où le joueur voit toutes les cases où il peut aller
 
 	    Parameters
 	    ----------
